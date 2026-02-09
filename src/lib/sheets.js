@@ -1,11 +1,3 @@
-// src/lib/sheets.js
-// ══════════════════════════════════════════════════════════════
-// Google Sheets Database Layer
-// Sheet structure:
-//   Sheet "students": Mã HV | Tên | SĐT | Ngày tạo
-//   Sheet "scores":   Mã HV | Tháng | P1 | P2 | P3 | P4 | P5 | P6 | P7 | L Đúng | R Đúng | L Điểm | R Điểm | Tổng | Ngày nhập
-// ══════════════════════════════════════════════════════════════
-
 import { google } from "googleapis";
 
 let sheetsClient = null;
@@ -13,10 +5,29 @@ let sheetsClient = null;
 function getClient() {
   if (sheetsClient) return sheetsClient;
 
+  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  let privateKey = process.env.GOOGLE_PRIVATE_KEY;
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+
+  // Check if env vars are set
+  if (!email || !privateKey || !sheetId) {
+    throw new Error(
+      `Missing environment variables. Email: ${!!email}, PrivateKey: ${!!privateKey}, SheetId: ${!!sheetId}`
+    );
+  }
+
+  // Fix private key format - handle different formats
+  // Remove quotes if present
+  if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+    privateKey = privateKey.slice(1, -1);
+  }
+  // Replace escaped newlines with actual newlines
+  privateKey = privateKey.replace(/\\n/g, '\n');
+
   const auth = new google.auth.GoogleAuth({
     credentials: {
-      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+      client_email: email,
+      private_key: privateKey,
     },
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
@@ -26,6 +37,7 @@ function getClient() {
 }
 
 const SHEET_ID = process.env.GOOGLE_SHEET_ID;
+
 
 // ─── Initialize sheets if they don't exist ────────────────────
 export async function initSheets() {
