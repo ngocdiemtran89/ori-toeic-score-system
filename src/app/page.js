@@ -917,30 +917,32 @@ export default function Home() {
                         với kết quả đạt được như sau:
                       </div>
 
-                      {/* Score box */}
+                      {/* Score box - Centered and balanced */}
                       <div style={{
-                        display: "inline-block",
-                        padding: "20px 48px",
+                        padding: "24px 56px",
                         background: "linear-gradient(180deg, #fefefe 0%, #f8f9fa 100%)",
                         border: "2px solid #d4af37",
                         position: "relative",
-                        boxShadow: "0 4px 12px rgba(212,175,55,0.15)"
+                        boxShadow: "0 4px 12px rgba(212,175,55,0.15)",
+                        textAlign: "center"
                       }}>
                         <div style={{ position: "absolute", top: 5, left: 5, right: 5, bottom: 5, border: "1px solid rgba(212,175,55,0.3)", pointerEvents: "none" }} />
 
-                        <div style={{ display: "flex", gap: 48, justifyContent: "center", marginBottom: 14 }}>
-                          <div>
-                            <span style={{ fontWeight: 600, color: "#1e3a8a", fontSize: 15 }}>Listening: </span>
-                            <span style={{ fontWeight: 800, color: "#d4af37", fontSize: 24 }}>{certListening}</span>
+                        {/* Listening & Reading - Blue text */}
+                        <div style={{ display: "flex", gap: 56, justifyContent: "center", marginBottom: 16 }}>
+                          <div style={{ textAlign: "center" }}>
+                            <div style={{ fontWeight: 600, color: "#1e3a8a", fontSize: 14, marginBottom: 4 }}>Listening</div>
+                            <div style={{ fontWeight: 800, color: "#1e3a8a", fontSize: 26 }}>{certListening}</div>
                           </div>
-                          <div>
-                            <span style={{ fontWeight: 600, color: "#1e3a8a", fontSize: 15 }}>Reading: </span>
-                            <span style={{ fontWeight: 800, color: "#d4af37", fontSize: 24 }}>{certReading}</span>
+                          <div style={{ textAlign: "center" }}>
+                            <div style={{ fontWeight: 600, color: "#1e3a8a", fontSize: 14, marginBottom: 4 }}>Reading</div>
+                            <div style={{ fontWeight: 800, color: "#1e3a8a", fontSize: 26 }}>{certReading}</div>
                           </div>
                         </div>
 
-                        <div style={{ fontSize: 12, color: "#64748b", letterSpacing: 1, marginBottom: 6, textTransform: "uppercase" }}>Tổng điểm đạt được</div>
-                        <div style={{ fontSize: 44, fontWeight: 800, color: "#1e3a8a", lineHeight: 1 }}>{certTotal}</div>
+                        {/* Total - Gold and bigger */}
+                        <div style={{ fontSize: 12, color: "#64748b", letterSpacing: 1.5, marginBottom: 8, textTransform: "uppercase" }}>Tổng điểm đạt được</div>
+                        <div style={{ fontSize: 52, fontWeight: 800, color: "#d4af37", lineHeight: 1, textShadow: "1px 1px 2px rgba(0,0,0,0.1)" }}>{certTotal}</div>
                       </div>
                     </div>
 
