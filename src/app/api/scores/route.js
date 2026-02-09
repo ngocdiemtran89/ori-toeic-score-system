@@ -10,14 +10,15 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get("code");
 
-    if (code) {
-      const scores = await getScoresByStudent(code);
+    if (code && code.trim()) {
+      const scores = await getScoresByStudent(code.trim());
       return NextResponse.json({ scores });
     }
 
     const scores = await getAllScores();
     return NextResponse.json({ scores });
   } catch (error) {
+    console.error("GET /api/scores error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -27,9 +28,9 @@ export async function POST(request) {
   try {
     await initSheets();
     const body = await request.json();
-    const { code, month, P1, P2, P3, P4, P5, P6, P7 } = body;
+    const { code, month, P1, P2, P3, P4, P5, P6, P7 } = body || {};
 
-    if (!code || !month) {
+    if (!code || !code.trim() || !month || !month.trim()) {
       return NextResponse.json({ error: "code và month là bắt buộc" }, { status: 400 });
     }
 

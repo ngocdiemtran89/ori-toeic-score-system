@@ -10,14 +10,14 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search");
 
-    if (search) {
+    if (search && search.trim()) {
       const students = await getAllStudents();
-      const q = search.toLowerCase();
+      const q = search.toLowerCase().trim();
       const filtered = students.filter(
         (s) =>
-          s.code.toLowerCase().includes(q) ||
-          s.name.toLowerCase().includes(q) ||
-          s.phone.includes(search)
+          (s.code && s.code.toLowerCase().includes(q)) ||
+          (s.name && s.name.toLowerCase().includes(q)) ||
+          (s.phone && s.phone.includes(search))
       );
       return NextResponse.json({ students: filtered });
     }
@@ -25,6 +25,7 @@ export async function GET(request) {
     const students = await getAllStudents();
     return NextResponse.json({ students });
   } catch (error) {
+    console.error("GET /api/students error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
