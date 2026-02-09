@@ -15,6 +15,29 @@ function findLvl(t) { const l = Object.keys(STANDARDS).map(Number).sort((a, b) =
 function nextTgt(t) { const l = Object.keys(STANDARDS).map(Number).sort((a, b) => a - b); for (const v of l) if (v > t) return v; return l[l.length - 1] + 50; }
 function genTgt(cur, lvl) { const s = STANDARDS[lvl]; if (!s) return null; const t = {}; AP.forEach(p => { const sec = LP.includes(p) ? "L" : "R"; const tg = s[sec][p], c = cur[p] || 0; t[p] = { current: c, target: tg, diff: Math.max(0, tg - c), exceeded: c >= tg }; }); return t; }
 
+// Calculate extra questions needed for target score increase
+function calcExtraNeeded(currentL, currentR, targetIncrease) {
+  const currentTotal = LISTENING_TABLE[Math.min(100, currentL)] + READING_TABLE[Math.min(100, currentR)];
+  const targetTotal = currentTotal + targetIncrease;
+
+  // Try adding questions evenly to L and R
+  let extraL = 0, extraR = 0;
+  let testL = currentL, testR = currentR;
+
+  while (LISTENING_TABLE[Math.min(100, testL)] + READING_TABLE[Math.min(100, testR)] < targetTotal && (testL < 100 || testR < 100)) {
+    // Alternate adding to L and R, prioritize the one with more room for improvement
+    if (testL < 100 && (testR >= 100 || (100 - testL) >= (100 - testR))) {
+      testL++; extraL++;
+    } else if (testR < 100) {
+      testR++; extraR++;
+    } else break;
+  }
+
+  const achievedTotal = LISTENING_TABLE[Math.min(100, testL)] + READING_TABLE[Math.min(100, testR)];
+  return { extraL, extraR, extraTotal: extraL + extraR, achievedTotal, possible: achievedTotal >= targetTotal };
+}
+
+
 // ─── API helpers ──────────────────────────────────────────────
 const api = {
   async getStudents(search) {
@@ -216,7 +239,7 @@ export default function Home() {
           Dữ liệu lưu trên Google Sheets · {students.length} học viên
         </div>
         <div style={{ display: "flex", justifyContent: "center", gap: 5, flexWrap: "wrap" }}>
-          {[{ k: "input", l: "📝 Nhập" }, { k: "report", l: "📊 Báo cáo" }, { k: "history", l: "📈 Lịch sử" }, { k: "lookup", l: "🔍 Tra cứu" }].map(t =>
+          {[{ k: "input", l: "📝 Nhập" }, { k: "report", l: "📊 Báo cáo" }, { k: "screenshot", l: "📸 Chụp ảnh" }, { k: "history", l: "📈 Lịch sử" }, { k: "lookup", l: "🔍 Tra cứu" }].map(t =>
             <button key={t.k} onClick={() => setView(t.k)} className={`tag ${view === t.k ? "tag-active" : "tag-inactive"}`}>{t.l}</button>
           )}
         </div>
@@ -406,6 +429,246 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* ═══ SCREENSHOT REPORT ═══ */}
+      {view === "screenshot" && report && (() => {
+        const extra50 = calcExtraNeeded(report.est.lCorrect, report.est.rCorrect, 50);
+        const extra100 = calcExtraNeeded(report.est.lCorrect, report.est.rCorrect, 100);
+        return (
+          <div style={{ padding: 0 }}>
+            {/* Screenshot-friendly card */}
+            <div style={{
+              background: "linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+              borderRadius: 20,
+              padding: "24px 20px",
+              border: "2px solid rgba(255,215,64,0.3)",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.5)"
+            }}>
+              {/* Header with branding */}
+              <div style={{ textAlign: "center", marginBottom: 20 }}>
+                <div style={{
+                  fontSize: 11,
+                  letterSpacing: 4,
+                  color: "#FFD740",
+                  textTransform: "uppercase",
+                  fontWeight: 700,
+                  marginBottom: 4
+                }}>ORI EDUCATION</div>
+                <div style={{
+                  fontSize: 9,
+                  color: "rgba(255,255,255,0.4)",
+                  letterSpacing: 2
+                }}>BÁO CÁO ĐIỂM TOEIC · {moLabel(report.month)}</div>
+              </div>
+
+              {/* Student name */}
+              <div style={{ textAlign: "center", marginBottom: 16 }}>
+                <h2 style={{
+                  fontSize: 28,
+                  fontWeight: 900,
+                  margin: 0,
+                  color: "#fff",
+                  textShadow: "0 2px 10px rgba(255,107,53,0.3)"
+                }}>{report.name}</h2>
+                <div style={{
+                  fontSize: 11,
+                  color: "rgba(255,255,255,0.4)",
+                  marginTop: 4
+                }}>Mã HV: {report.code}</div>
+              </div>
+
+              {/* Main score circle */}
+              <div style={{
+                textAlign: "center",
+                margin: "20px 0",
+                position: "relative"
+              }}>
+                <div style={{
+                  width: 140,
+                  height: 140,
+                  margin: "0 auto",
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg, rgba(255,107,53,0.2), rgba(0,201,167,0.2))",
+                  border: "4px solid",
+                  borderColor: "#FFD740",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 0 40px rgba(255,215,64,0.3)"
+                }}>
+                  <div className="mono" style={{
+                    fontSize: 48,
+                    fontWeight: 900,
+                    background: "linear-gradient(135deg, #FF6B35, #FFD740)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent"
+                  }}>{report.est.total}</div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>/ 990</div>
+                </div>
+
+                {/* Change indicator */}
+                {report.prevEst && (
+                  <div style={{
+                    position: "absolute",
+                    right: "calc(50% - 90px)",
+                    top: 10,
+                    padding: "4px 10px",
+                    borderRadius: 12,
+                    fontSize: 13,
+                    fontWeight: 800,
+                    background: report.est.total >= report.prevEst.total
+                      ? "linear-gradient(135deg, #00E676, #00C853)"
+                      : "linear-gradient(135deg, #FF5252, #D32F2F)",
+                    color: "#fff",
+                    boxShadow: "0 4px 15px rgba(0,0,0,0.3)"
+                  }}>
+                    {report.est.total >= report.prevEst.total ? "↑" : "↓"} {Math.abs(report.est.total - report.prevEst.total)}
+                  </div>
+                )}
+              </div>
+
+              {/* L/R breakdown */}
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 12,
+                marginBottom: 20
+              }}>
+                <div style={{
+                  background: "rgba(255,107,53,0.15)",
+                  borderRadius: 12,
+                  padding: 12,
+                  textAlign: "center",
+                  border: "1px solid rgba(255,107,53,0.3)"
+                }}>
+                  <div style={{ fontSize: 10, color: "#FF6B35", fontWeight: 700, marginBottom: 4 }}>🎧 LISTENING</div>
+                  <div className="mono" style={{ fontSize: 28, fontWeight: 900, color: "#FF6B35" }}>{report.est.listening}</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>{report.est.lCorrect}/100 đúng</div>
+                </div>
+                <div style={{
+                  background: "rgba(0,201,167,0.15)",
+                  borderRadius: 12,
+                  padding: 12,
+                  textAlign: "center",
+                  border: "1px solid rgba(0,201,167,0.3)"
+                }}>
+                  <div style={{ fontSize: 10, color: "#00C9A7", fontWeight: 700, marginBottom: 4 }}>📖 READING</div>
+                  <div className="mono" style={{ fontSize: 28, fontWeight: 900, color: "#00C9A7" }}>{report.est.reading}</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>{report.est.rCorrect}/100 đúng</div>
+                </div>
+              </div>
+
+              {/* Part breakdown */}
+              <div style={{
+                background: "rgba(255,255,255,0.03)",
+                borderRadius: 12,
+                padding: 12,
+                marginBottom: 16
+              }}>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginBottom: 8, letterSpacing: 1 }}>CHI TIẾT TỪNG PART</div>
+                <div style={{ display: "flex", gap: 4, justifyContent: "center", flexWrap: "wrap" }}>
+                  {AP.map(p => (
+                    <div key={p} style={{
+                      padding: "6px 10px",
+                      borderRadius: 8,
+                      background: LP.includes(p) ? "rgba(255,107,53,0.1)" : "rgba(0,201,167,0.1)",
+                      border: `1px solid ${LP.includes(p) ? "rgba(255,107,53,0.3)" : "rgba(0,201,167,0.3)"}`,
+                      textAlign: "center",
+                      minWidth: 50
+                    }}>
+                      <div className="mono" style={{ fontSize: 10, color: LP.includes(p) ? "#FF6B35" : "#00C9A7", fontWeight: 700 }}>{p}</div>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: "#fff" }}>{report.scores[p]}/{PM[p]}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Target goals +50 and +100 */}
+              <div style={{
+                background: "linear-gradient(135deg, rgba(255,215,64,0.1), rgba(255,107,53,0.1))",
+                borderRadius: 16,
+                padding: 16,
+                border: "2px solid rgba(255,215,64,0.3)"
+              }}>
+                <div style={{
+                  fontSize: 12,
+                  fontWeight: 800,
+                  color: "#FFD740",
+                  marginBottom: 12,
+                  textAlign: "center",
+                  letterSpacing: 1
+                }}>🎯 MỤC TIÊU THÁNG SAU</div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  {/* +50 target */}
+                  <div style={{
+                    background: "rgba(0,0,0,0.3)",
+                    borderRadius: 12,
+                    padding: 12,
+                    textAlign: "center"
+                  }}>
+                    <div style={{ fontSize: 10, color: "#00E676", fontWeight: 700, marginBottom: 4 }}>TĂNG +50 ĐIỂM</div>
+                    <div className="mono" style={{ fontSize: 22, fontWeight: 900, color: "#00E676" }}>{report.est.total + 50}</div>
+                    <div style={{ height: 1, background: "rgba(255,255,255,0.1)", margin: "8px 0" }}></div>
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)" }}>
+                      Cần thêm: <span style={{ fontWeight: 800, color: "#FFD740" }}>{extra50.extraTotal} câu</span>
+                    </div>
+                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>
+                      (L +{extra50.extraL} / R +{extra50.extraR})
+                    </div>
+                  </div>
+
+                  {/* +100 target */}
+                  <div style={{
+                    background: "rgba(0,0,0,0.3)",
+                    borderRadius: 12,
+                    padding: 12,
+                    textAlign: "center"
+                  }}>
+                    <div style={{ fontSize: 10, color: "#FF6B35", fontWeight: 700, marginBottom: 4 }}>TĂNG +100 ĐIỂM</div>
+                    <div className="mono" style={{ fontSize: 22, fontWeight: 900, color: "#FF6B35" }}>{Math.min(990, report.est.total + 100)}</div>
+                    <div style={{ height: 1, background: "rgba(255,255,255,0.1)", margin: "8px 0" }}></div>
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)" }}>
+                      Cần thêm: <span style={{ fontWeight: 800, color: "#FFD740" }}>{extra100.extraTotal} câu</span>
+                    </div>
+                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>
+                      (L +{extra100.extraL} / R +{extra100.extraR})
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div style={{
+                textAlign: "center",
+                marginTop: 16,
+                paddingTop: 12,
+                borderTop: "1px solid rgba(255,255,255,0.1)"
+              }}>
+                <div style={{ fontSize: 10, color: "#FFD740", fontWeight: 700, marginBottom: 2 }}>ORI EDUCATION</div>
+                <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)" }}>📞 0906 303 373 · Zalo hỗ trợ 24/7</div>
+              </div>
+            </div>
+
+            <div style={{ textAlign: "center", marginTop: 12, fontSize: 11, color: "var(--text-dim)" }}>
+              📸 Chụp ảnh màn hình phía trên để gửi cho học viên!
+            </div>
+          </div>
+        );
+      })()}
+
+      {view === "screenshot" && !report && (
+        <div className="card" style={{ textAlign: "center", padding: 30 }}>
+          <div style={{ fontSize: 40, marginBottom: 10 }}>📸</div>
+          <div style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 10 }}>Chưa có báo cáo</div>
+          <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Vui lòng nhập điểm và tạo báo cáo trước</div>
+          <button className="btn-primary" onClick={() => setView("input")} style={{ marginTop: 16 }}>
+            📝 Đi đến Nhập điểm
+          </button>
+        </div>
+      )}
+
 
       {/* ═══ HISTORY ═══ */}
       {view === "history" && (
