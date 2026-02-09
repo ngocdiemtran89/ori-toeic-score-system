@@ -722,7 +722,7 @@ export default function Home() {
 
         const today = new Date();
         const dateStr = `TP. Hồ Chí Minh, ngày ${today.getDate()} tháng ${today.getMonth() + 1} năm ${today.getFullYear()}`;
-        const instructorSign = certInstructor === "Grace Nguyễn" ? "Grace" :
+        const instructorSign = certInstructor === "Grace Phạm" ? "Grace" :
           certInstructor === "Đỗ Ngọc Loan" ? "N. Loan" : "T. N. Diễm";
 
         return (
@@ -755,7 +755,7 @@ export default function Home() {
                     style={{ width: "100%" }}
                   >
                     <option value="Trần Ngọc Diễm">Trần Ngọc Diễm</option>
-                    <option value="Grace Nguyễn">Grace Nguyễn</option>
+                    <option value="Grace Phạm">Grace Phạm</option>
                     <option value="Đỗ Ngọc Loan">Đỗ Ngọc Loan</option>
                   </select>
                 </div>
