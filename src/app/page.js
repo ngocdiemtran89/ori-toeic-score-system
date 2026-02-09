@@ -120,6 +120,16 @@ export default function Home() {
   const [lookupQ, setLookupQ] = useState("");
   const [lookupResults, setLookupResults] = useState([]);
 
+  // Certificate
+  const certRef = useRef(null);
+  const [certStudent, setCertStudent] = useState("");
+  const [certName, setCertName] = useState("Học Viên");
+  const [certListening, setCertListening] = useState(0);
+  const [certReading, setCertReading] = useState(0);
+  const [certTotal, setCertTotal] = useState(0);
+  const [certInstructor, setCertInstructor] = useState("Trần Ngọc Diễm");
+  const [exporting, setExporting] = useState(false);
+
   const flash = (msg, type = "success") => { setToast({ msg, type }); setTimeout(() => setToast(null), 3000); };
   const moLabel = (m) => { const [y, mo] = m.split("-"); return `T${parseInt(mo)}/${y}`; };
 
@@ -671,15 +681,6 @@ export default function Home() {
 
       {/* ═══ CERTIFICATE ═══ */}
       {view === "certificate" && (() => {
-        const certRef = useRef(null);
-        const [certStudent, setCertStudent] = useState("");
-        const [certName, setCertName] = useState("Học Viên");
-        const [certListening, setCertListening] = useState(0);
-        const [certReading, setCertReading] = useState(0);
-        const [certTotal, setCertTotal] = useState(0);
-        const [certInstructor, setCertInstructor] = useState("Trần Ngọc Diễm");
-        const [exporting, setExporting] = useState(false);
-
         const loadCertStudent = async (code) => {
           setCertStudent(code);
           const student = students.find(s => s.code === code);
