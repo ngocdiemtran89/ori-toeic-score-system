@@ -672,48 +672,236 @@ export default function Home() {
 
       {/* ═══ HISTORY ═══ */}
       {view === "history" && (
-        <div className="card">
-          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", marginBottom: 10 }}>📈 LỊCH SỬ</div>
-          {students.length === 0 ? <div style={{ textAlign: "center", padding: 24, color: "var(--text-dim)" }}>📭 Chưa có học viên</div> : (
-            <>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 12 }}>
-                {students.map(s => (
-                  <button key={s.code} onClick={() => loadHistory(s.code)} className={`tag ${selStudent === s.code ? "tag-active" : "tag-inactive"}`}>
-                    {s.name} <span style={{ opacity: 0.4, fontSize: 10 }}>{s.code}</span>
-                  </button>
-                ))}
-              </div>
-              {selStudent && (
-                <div>
-                  {selHistory.length === 0 ? <div style={{ textAlign: "center", padding: 16, color: "var(--text-dim)", fontSize: 13 }}>Chưa có bản ghi</div> :
-                    selHistory.sort((a, b) => b.month.localeCompare(a.month)).map((rec, idx, arr) => {
-                      const prev = idx + 1 < arr.length ? arr[idx + 1] : null;
-                      const diff = prev ? rec.total - prev.total : null;
+        <div>
+          <div className="card">
+            <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", marginBottom: 10 }}>📈 LỊCH SỬ ĐIỂM</div>
+            {students.length === 0 ? <div style={{ textAlign: "center", padding: 24, color: "var(--text-dim)" }}>📭 Chưa có học viên</div> : (
+              <>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 12 }}>
+                  {students.map(s => (
+                    <button key={s.code} onClick={() => loadHistory(s.code)} className={`tag ${selStudent === s.code ? "tag-active" : "tag-inactive"}`}>
+                      {s.name} <span style={{ opacity: 0.4, fontSize: 10 }}>{s.code}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Progress Chart - Screenshot Optimized */}
+          {selStudent && selHistory.length > 0 && (() => {
+            const sorted = [...selHistory].sort((a, b) => a.month.localeCompare(b.month));
+            const studentInfo = students.find(s => s.code === selStudent);
+            const maxScore = 990;
+            const firstScore = sorted[0]?.total || 0;
+            const lastScore = sorted[sorted.length - 1]?.total || 0;
+            const totalProgress = lastScore - firstScore;
+
+            return (
+              <div style={{
+                background: "linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+                borderRadius: 20,
+                padding: "20px 16px",
+                border: "2px solid rgba(255,215,64,0.3)",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+                marginTop: 12
+              }}>
+                {/* Header */}
+                <div style={{ textAlign: "center", marginBottom: 16 }}>
+                  <div style={{ fontSize: 10, letterSpacing: 3, color: "#FFD740", fontWeight: 700 }}>ORI EDUCATION</div>
+                  <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>BIỂU ĐỒ TIẾN BỘ TOEIC</div>
+                  <h3 style={{ fontSize: 22, fontWeight: 900, color: "#fff", margin: 0 }}>{studentInfo?.name || selStudent}</h3>
+                </div>
+
+                {/* Total Progress Badge */}
+                <div style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: 12,
+                  marginBottom: 20
+                }}>
+                  <div style={{
+                    background: "rgba(255,255,255,0.05)",
+                    borderRadius: 12,
+                    padding: "10px 16px",
+                    textAlign: "center"
+                  }}>
+                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>LẦN ĐẦU</div>
+                    <div className="mono" style={{ fontSize: 18, fontWeight: 800, color: "#FF6B35" }}>{firstScore}</div>
+                  </div>
+                  <div style={{
+                    background: totalProgress >= 0 ? "rgba(0,230,118,0.15)" : "rgba(255,82,82,0.15)",
+                    borderRadius: 12,
+                    padding: "10px 16px",
+                    textAlign: "center",
+                    border: `2px solid ${totalProgress >= 0 ? "rgba(0,230,118,0.5)" : "rgba(255,82,82,0.5)"}`
+                  }}>
+                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>TIẾN BỘ</div>
+                    <div className="mono" style={{ fontSize: 18, fontWeight: 900, color: totalProgress >= 0 ? "#00E676" : "#FF5252" }}>
+                      {totalProgress >= 0 ? `+${totalProgress}` : totalProgress}
+                    </div>
+                  </div>
+                  <div style={{
+                    background: "rgba(255,255,255,0.05)",
+                    borderRadius: 12,
+                    padding: "10px 16px",
+                    textAlign: "center"
+                  }}>
+                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>HIỆN TẠI</div>
+                    <div className="mono" style={{ fontSize: 18, fontWeight: 800, color: "#00C9A7" }}>{lastScore}</div>
+                  </div>
+                </div>
+
+                {/* Bar Chart */}
+                <div style={{
+                  background: "rgba(0,0,0,0.3)",
+                  borderRadius: 16,
+                  padding: 16,
+                  marginBottom: 16
+                }}>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginBottom: 12, letterSpacing: 1 }}>ĐIỂM TỔNG QUA CÁC THÁNG</div>
+
+                  <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 120, justifyContent: "center" }}>
+                    {sorted.map((rec, idx) => {
+                      const height = (rec.total / maxScore) * 100;
+                      const prevRec = idx > 0 ? sorted[idx - 1] : null;
+                      const change = prevRec ? rec.total - prevRec.total : 0;
                       return (
-                        <div key={rec.month} style={{ padding: 12, marginBottom: 6, background: "rgba(255,255,255,0.02)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.04)" }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                            <span style={{ fontWeight: 700, fontSize: 13 }}>{moLabel(rec.month)}</span>
-                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                              <span className="mono" style={{ fontSize: 18, fontWeight: 900, color: "#FFD740" }}>{rec.total}</span>
-                              {diff != null && <span style={{ fontSize: 12, fontWeight: 700, color: diff >= 0 ? "#00E676" : "#FF5252" }}>{diff >= 0 ? `+${diff}` : diff}</span>}
+                        <div key={rec.month} style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1, maxWidth: 60 }}>
+                          {/* Change indicator */}
+                          {change !== 0 && (
+                            <div style={{
+                              fontSize: 9,
+                              fontWeight: 700,
+                              color: change > 0 ? "#00E676" : "#FF5252",
+                              marginBottom: 4
+                            }}>
+                              {change > 0 ? `+${change}` : change}
                             </div>
+                          )}
+                          {/* Bar */}
+                          <div style={{
+                            width: "100%",
+                            height: `${height}%`,
+                            minHeight: 20,
+                            background: `linear-gradient(180deg, #FFD740 0%, #FF6B35 100%)`,
+                            borderRadius: "8px 8px 4px 4px",
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "flex-end",
+                            alignItems: "center",
+                            paddingBottom: 4,
+                            boxShadow: "0 4px 15px rgba(255,107,53,0.3)"
+                          }}>
+                            <div className="mono" style={{ fontSize: 12, fontWeight: 900, color: "#1a1a2e" }}>{rec.total}</div>
                           </div>
-                          <div style={{ display: "flex", gap: 8, fontSize: 11, color: "var(--text-dim)", marginBottom: 4 }}>
-                            <span>🎧 {rec.lCorrect}đúng → <strong style={{ color: "#FF6B35" }}>{rec.listening}</strong></span>
-                            <span>📖 {rec.rCorrect}đúng → <strong style={{ color: "#00C9A7" }}>{rec.reading}</strong></span>
-                          </div>
-                          <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
-                            {["P1", "P2", "P3", "P4", "P5", "P6", "P7"].map(p => (
-                              <span key={p} className="mono" style={{ fontSize: 10, padding: "2px 5px", borderRadius: 4, background: LP.includes(p) ? "rgba(255,107,53,0.06)" : "rgba(0,201,167,0.06)", color: LP.includes(p) ? "#FF6B35" : "#00C9A7" }}>{p}:{rec[p]}</span>
-                            ))}
-                          </div>
+                          {/* Month label */}
+                          <div style={{ fontSize: 9, color: "rgba(255,255,255,0.5)", marginTop: 6 }}>{moLabel(rec.month)}</div>
                         </div>
                       );
-                    })
-                  }
+                    })}
+                  </div>
                 </div>
-              )}
-            </>
+
+                {/* L/R Breakdown Chart */}
+                <div style={{
+                  background: "rgba(0,0,0,0.3)",
+                  borderRadius: 16,
+                  padding: 16
+                }}>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginBottom: 12, letterSpacing: 1 }}>LISTENING vs READING</div>
+
+                  <div style={{ display: "flex", gap: 16 }}>
+                    {/* Listening chart */}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 10, color: "#FF6B35", fontWeight: 700, marginBottom: 8, textAlign: "center" }}>🎧 LISTENING</div>
+                      <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 60, justifyContent: "center" }}>
+                        {sorted.map(rec => (
+                          <div key={rec.month} style={{
+                            flex: 1,
+                            maxWidth: 30,
+                            height: `${(rec.listening / 495) * 100}%`,
+                            minHeight: 10,
+                            background: "linear-gradient(180deg, #FF6B35, #FF8C5A)",
+                            borderRadius: 4,
+                            display: "flex",
+                            alignItems: "flex-end",
+                            justifyContent: "center"
+                          }}>
+                            <span style={{ fontSize: 8, fontWeight: 700, color: "#fff", marginBottom: 2 }}>{rec.listening}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Reading chart */}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 10, color: "#00C9A7", fontWeight: 700, marginBottom: 8, textAlign: "center" }}>📖 READING</div>
+                      <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 60, justifyContent: "center" }}>
+                        {sorted.map(rec => (
+                          <div key={rec.month} style={{
+                            flex: 1,
+                            maxWidth: 30,
+                            height: `${(rec.reading / 495) * 100}%`,
+                            minHeight: 10,
+                            background: "linear-gradient(180deg, #00C9A7, #00E7C1)",
+                            borderRadius: 4,
+                            display: "flex",
+                            alignItems: "flex-end",
+                            justifyContent: "center"
+                          }}>
+                            <span style={{ fontSize: 8, fontWeight: 700, color: "#fff", marginBottom: 2 }}>{rec.reading}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div style={{ textAlign: "center", marginTop: 16, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+                  <div style={{ fontSize: 10, color: "#FFD740", fontWeight: 700 }}>ORI EDUCATION</div>
+                  <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)" }}>📞 0906 303 373</div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Detailed History List */}
+          {selStudent && selHistory.length > 0 && (
+            <div className="card" style={{ marginTop: 12 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", marginBottom: 10 }}>📋 CHI TIẾT TỪNG THÁNG</div>
+              {selHistory.sort((a, b) => b.month.localeCompare(a.month)).map((rec, idx, arr) => {
+                const prev = idx + 1 < arr.length ? arr[idx + 1] : null;
+                const diff = prev ? rec.total - prev.total : null;
+                return (
+                  <div key={rec.month} style={{ padding: 12, marginBottom: 6, background: "rgba(255,255,255,0.02)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.04)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                      <span style={{ fontWeight: 700, fontSize: 13 }}>{moLabel(rec.month)}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span className="mono" style={{ fontSize: 18, fontWeight: 900, color: "#FFD740" }}>{rec.total}</span>
+                        {diff != null && <span style={{ fontSize: 12, fontWeight: 700, color: diff >= 0 ? "#00E676" : "#FF5252" }}>{diff >= 0 ? `+${diff}` : diff}</span>}
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 8, fontSize: 11, color: "var(--text-dim)", marginBottom: 4 }}>
+                      <span>🎧 {rec.lCorrect}đúng → <strong style={{ color: "#FF6B35" }}>{rec.listening}</strong></span>
+                      <span>📖 {rec.rCorrect}đúng → <strong style={{ color: "#00C9A7" }}>{rec.reading}</strong></span>
+                    </div>
+                    <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
+                      {["P1", "P2", "P3", "P4", "P5", "P6", "P7"].map(p => (
+                        <span key={p} className="mono" style={{ fontSize: 10, padding: "2px 5px", borderRadius: 4, background: LP.includes(p) ? "rgba(255,107,53,0.06)" : "rgba(0,201,167,0.06)", color: LP.includes(p) ? "#FF6B35" : "#00C9A7" }}>{p}:{rec[p]}</span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {selStudent && selHistory.length === 0 && (
+            <div className="card" style={{ marginTop: 12, textAlign: "center", padding: 20 }}>
+              <div style={{ color: "var(--text-dim)", fontSize: 13 }}>Chưa có bản ghi điểm</div>
+            </div>
           )}
         </div>
       )}
