@@ -819,25 +819,25 @@ export default function Home() {
                     pointerEvents: "none"
                   }} />
 
-                  {/* Content area with proper margin */}
+                  {/* Content area with proper margin - safe distance from border */}
                   <div style={{
                     position: "absolute",
-                    top: 28,
-                    left: 28,
-                    right: 28,
-                    bottom: 28,
+                    top: 36,
+                    left: 36,
+                    right: 36,
+                    bottom: 36,
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "space-between"
                   }}>
-                    {/* Corner decorations */}
-                    <div style={{ position: "absolute", top: 0, left: 0, width: 45, height: 45, borderTop: "3px solid #d4af37", borderLeft: "3px solid #d4af37" }} />
-                    <div style={{ position: "absolute", top: 0, right: 0, width: 45, height: 45, borderTop: "3px solid #d4af37", borderRight: "3px solid #d4af37" }} />
-                    <div style={{ position: "absolute", bottom: 0, left: 0, width: 45, height: 45, borderBottom: "3px solid #d4af37", borderLeft: "3px solid #d4af37" }} />
-                    <div style={{ position: "absolute", bottom: 0, right: 0, width: 45, height: 45, borderBottom: "3px solid #d4af37", borderRight: "3px solid #d4af37" }} />
+                    {/* Corner decorations - inside content with offset */}
+                    <div style={{ position: "absolute", top: -8, left: -8, width: 40, height: 40, borderTop: "3px solid #d4af37", borderLeft: "3px solid #d4af37" }} />
+                    <div style={{ position: "absolute", top: -8, right: -8, width: 40, height: 40, borderTop: "3px solid #d4af37", borderRight: "3px solid #d4af37" }} />
+                    <div style={{ position: "absolute", bottom: -8, left: -8, width: 40, height: 40, borderBottom: "3px solid #d4af37", borderLeft: "3px solid #d4af37" }} />
+                    <div style={{ position: "absolute", bottom: -8, right: -8, width: 40, height: 40, borderBottom: "3px solid #d4af37", borderRight: "3px solid #d4af37" }} />
 
-                    {/* ═══ HEADER ═══ */}
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                    {/* ═══ HEADER - với padding để tránh góc trang trí ═══ */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", paddingTop: 8, paddingLeft: 40, paddingRight: 40 }}>
                       <div style={{
                         padding: "7px 16px",
                         background: "linear-gradient(135deg, #1e3a8a 0%, #172554 100%)",
@@ -848,7 +848,7 @@ export default function Home() {
                         letterSpacing: 2,
                         boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
                       }}>ORI ACADEMY</div>
-                      <div style={{ fontStyle: "italic", fontSize: 13, color: "#475569", paddingTop: 4 }}>{dateStr}</div>
+                      <div style={{ fontStyle: "italic", fontSize: 13, color: "#475569", paddingTop: 6 }}>{dateStr}</div>
                     </div>
 
                     {/* ═══ TITLE ═══ */}
@@ -936,8 +936,8 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* ═══ SIGNATURES ═══ */}
-                    <div style={{ display: "flex", justifyContent: "space-between", paddingLeft: 20, paddingRight: 20 }}>
+                    {/* ═══ SIGNATURES - với padding để tránh góc trang trí ═══ */}
+                    <div style={{ display: "flex", justifyContent: "space-between", paddingLeft: 50, paddingRight: 50, paddingBottom: 8 }}>
                       <div style={{ textAlign: "center", width: 150 }}>
                         <div style={{ height: 42, borderBottom: "2px solid #d4af37", position: "relative", marginBottom: 8 }}>
                           <div style={{
