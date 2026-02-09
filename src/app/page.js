@@ -941,8 +941,8 @@ export default function Home() {
                         </div>
 
                         {/* Total - Gold and bigger */}
-                        <div style={{ fontSize: 12, color: "#64748b", letterSpacing: 1.5, marginBottom: 8, textTransform: "uppercase" }}>Tổng điểm đạt được</div>
-                        <div style={{ fontSize: 52, fontWeight: 800, color: "#d4af37", lineHeight: 1, textShadow: "1px 1px 2px rgba(0,0,0,0.1)" }}>{certTotal}</div>
+                        <div style={{ fontSize: 12, color: "#64748b", letterSpacing: 1.5, marginBottom: 8, textTransform: "uppercase", textAlign: "center" }}>Tổng điểm đạt được</div>
+                        <div style={{ fontSize: 52, fontWeight: 800, color: "#d4af37", lineHeight: 1, textShadow: "1px 1px 2px rgba(0,0,0,0.1)", textAlign: "center" }}>{certTotal}</div>
                       </div>
                     </div>
 
