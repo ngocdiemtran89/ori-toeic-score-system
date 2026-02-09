@@ -790,22 +790,22 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Certificate Preview - Compact Design */}
+            {/* Certificate Preview - Classic Design */}
             {(() => {
               // Smart font size based on name length
               const nameLen = certName.length;
-              const nameFontSize = nameLen <= 8 ? 52 : nameLen <= 12 ? 46 : nameLen <= 18 ? 38 : 30;
+              const nameFontSize = nameLen <= 8 ? 48 : nameLen <= 12 ? 42 : nameLen <= 18 ? 36 : 28;
 
               return (
                 <div ref={certRef} style={{
                   width: "100%",
                   aspectRatio: "210/297",
                   background: "#ffffff",
-                  border: "10px solid #1e3a8a",
-                  outline: "3px double #d4af37",
-                  outlineOffset: "-6px",
-                  borderRadius: 2,
-                  padding: "16px 20px",
+                  border: "12px solid #1e3a8a",
+                  outline: "4px double #d4af37",
+                  outlineOffset: "-8px",
+                  borderRadius: 0,
+                  padding: "32px 36px",
                   boxSizing: "border-box",
                   display: "flex",
                   flexDirection: "column",
@@ -815,9 +815,11 @@ export default function Home() {
                   color: "#1e3a8a",
                   overflow: "hidden"
                 }}>
-                  {/* Corner decorations */}
-                  <div style={{ position: "absolute", top: 10, left: 10, width: 35, height: 35, borderTop: "2px solid #d4af37", borderLeft: "2px solid #d4af37", opacity: 0.6 }} />
-                  <div style={{ position: "absolute", bottom: 10, right: 10, width: 35, height: 35, borderBottom: "2px solid #d4af37", borderRight: "2px solid #d4af37", opacity: 0.6 }} />
+                  {/* Corner decorations - positioned inside the margin */}
+                  <div style={{ position: "absolute", top: 20, left: 20, width: 50, height: 50, borderTop: "3px solid #d4af37", borderLeft: "3px solid #d4af37", opacity: 0.7 }} />
+                  <div style={{ position: "absolute", top: 20, right: 20, width: 50, height: 50, borderTop: "3px solid #d4af37", borderRight: "3px solid #d4af37", opacity: 0.7 }} />
+                  <div style={{ position: "absolute", bottom: 20, left: 20, width: 50, height: 50, borderBottom: "3px solid #d4af37", borderLeft: "3px solid #d4af37", opacity: 0.7 }} />
+                  <div style={{ position: "absolute", bottom: 20, right: 20, width: 50, height: 50, borderBottom: "3px solid #d4af37", borderRight: "3px solid #d4af37", opacity: 0.7 }} />
 
                   {/* Header */}
                   <div style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
