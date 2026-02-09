@@ -790,116 +790,187 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Certificate Preview - Classic Design */}
+            {/* Certificate Preview - Expert Design */}
             {(() => {
-              // Smart font size based on name length
+              // Dynamic font size: tên ngắn → to, tên dài → nhỏ hơn
               const nameLen = certName.length;
-              const nameFontSize = nameLen <= 8 ? 48 : nameLen <= 12 ? 42 : nameLen <= 18 ? 36 : 28;
+              const nameFontSize = nameLen <= 6 ? 72 : nameLen <= 10 ? 60 : nameLen <= 15 ? 50 : nameLen <= 20 ? 42 : 34;
 
               return (
                 <div ref={certRef} style={{
                   width: "100%",
                   aspectRatio: "210/297",
-                  background: "#ffffff",
-                  border: "12px solid #1e3a8a",
-                  outline: "4px double #d4af37",
-                  outlineOffset: "-8px",
-                  borderRadius: 0,
-                  padding: "32px 36px",
-                  boxSizing: "border-box",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
+                  background: "linear-gradient(180deg, #ffffff 0%, #fefefe 100%)",
+                  border: "14px solid #1e3a8a",
                   position: "relative",
+                  boxSizing: "border-box",
                   fontFamily: "Times New Roman, serif",
                   color: "#1e3a8a",
                   overflow: "hidden"
                 }}>
-                  {/* Corner decorations - positioned inside the margin */}
-                  <div style={{ position: "absolute", top: 20, left: 20, width: 50, height: 50, borderTop: "3px solid #d4af37", borderLeft: "3px solid #d4af37", opacity: 0.7 }} />
-                  <div style={{ position: "absolute", top: 20, right: 20, width: 50, height: 50, borderTop: "3px solid #d4af37", borderRight: "3px solid #d4af37", opacity: 0.7 }} />
-                  <div style={{ position: "absolute", bottom: 20, left: 20, width: 50, height: 50, borderBottom: "3px solid #d4af37", borderLeft: "3px solid #d4af37", opacity: 0.7 }} />
-                  <div style={{ position: "absolute", bottom: 20, right: 20, width: 50, height: 50, borderBottom: "3px solid #d4af37", borderRight: "3px solid #d4af37", opacity: 0.7 }} />
+                  {/* Inner gold border frame */}
+                  <div style={{
+                    position: "absolute",
+                    top: 12,
+                    left: 12,
+                    right: 12,
+                    bottom: 12,
+                    border: "3px double #d4af37",
+                    pointerEvents: "none"
+                  }} />
 
-                  {/* Header */}
-                  <div style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ padding: "6px 14px", background: "#1e3a8a", color: "#d4af37", fontFamily: "Montserrat, Arial, sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 1.5 }}>ORI ACADEMY</div>
-                    <div style={{ fontStyle: "italic", fontSize: 12, color: "#334155" }}>{dateStr}</div>
-                  </div>
+                  {/* Content area with proper margin */}
+                  <div style={{
+                    position: "absolute",
+                    top: 28,
+                    left: 28,
+                    right: 28,
+                    bottom: 28,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between"
+                  }}>
+                    {/* Corner decorations */}
+                    <div style={{ position: "absolute", top: 0, left: 0, width: 45, height: 45, borderTop: "3px solid #d4af37", borderLeft: "3px solid #d4af37" }} />
+                    <div style={{ position: "absolute", top: 0, right: 0, width: 45, height: 45, borderTop: "3px solid #d4af37", borderRight: "3px solid #d4af37" }} />
+                    <div style={{ position: "absolute", bottom: 0, left: 0, width: 45, height: 45, borderBottom: "3px solid #d4af37", borderLeft: "3px solid #d4af37" }} />
+                    <div style={{ position: "absolute", bottom: 0, right: 0, width: 45, height: 45, borderBottom: "3px solid #d4af37", borderRight: "3px solid #d4af37" }} />
 
-                  {/* Title Section */}
-                  <div style={{ textAlign: "center", marginTop: 8 }}>
-                    <h1 style={{
-                      fontFamily: "Playfair Display, serif",
-                      fontSize: 48,
-                      fontWeight: 700,
-                      margin: 0,
-                      textTransform: "uppercase",
-                      letterSpacing: 5,
-                      background: "linear-gradient(to right, #1e3a8a, #d4af37, #1e3a8a)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent"
-                    }}>Bằng Khen</h1>
-                    <div style={{ fontFamily: "Montserrat, Arial, sans-serif", fontSize: 14, fontWeight: 600, color: "#d4af37", letterSpacing: 3, textTransform: "uppercase", marginTop: 4 }}>TOEIC ACHIEVEMENT AWARD</div>
-                  </div>
-
-                  {/* Recipient Section */}
-                  <div style={{ textAlign: "center" }}>
-                    <div style={{ fontSize: 15, color: "#334155", marginBottom: 8, fontStyle: "italic" }}>Hệ thống Anh ngữ ORI trân trọng trao tặng cho</div>
-                    <div style={{
-                      fontFamily: "Great Vibes, cursive",
-                      fontSize: nameFontSize,
-                      color: "#1e3a8a",
-                      lineHeight: 1.1,
-                      padding: "4px 0"
-                    }}>{certName}</div>
-                  </div>
-
-                  {/* Score Section */}
-                  <div style={{ textAlign: "center" }}>
-                    <div style={{ fontSize: 14, lineHeight: 1.5, color: "#1e293b", marginBottom: 10 }}>
-                      Đã hoàn thành xuất sắc kỳ thi thử TOEIC chuẩn quốc tế<br />với kết quả đạt được như sau:
+                    {/* ═══ HEADER ═══ */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                      <div style={{
+                        padding: "7px 16px",
+                        background: "linear-gradient(135deg, #1e3a8a 0%, #172554 100%)",
+                        color: "#d4af37",
+                        fontFamily: "Montserrat, Arial, sans-serif",
+                        fontWeight: 700,
+                        fontSize: 14,
+                        letterSpacing: 2,
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+                      }}>ORI ACADEMY</div>
+                      <div style={{ fontStyle: "italic", fontSize: 13, color: "#475569", paddingTop: 4 }}>{dateStr}</div>
                     </div>
 
-                    {/* Score box */}
-                    <div style={{
-                      display: "inline-block",
-                      padding: "16px 40px",
-                      background: "linear-gradient(135deg, #fefefe 0%, #f8f9fa 100%)",
-                      border: "2px solid #d4af37",
-                      position: "relative"
-                    }}>
-                      <div style={{ position: "absolute", top: 4, left: 4, right: 4, bottom: 4, border: "1px solid rgba(212,175,55,0.4)", pointerEvents: "none" }} />
-                      <div style={{ display: "flex", gap: 36, justifyContent: "center", marginBottom: 12 }}>
-                        <div>
-                          <span style={{ fontWeight: 700, color: "#1e3a8a", fontSize: 14 }}>Listening: </span>
-                          <span style={{ fontWeight: 800, color: "#d4af37", fontSize: 20 }}>{certListening}</span>
+                    {/* ═══ TITLE ═══ */}
+                    <div style={{ textAlign: "center", marginTop: 12 }}>
+                      <h1 style={{
+                        fontFamily: "Playfair Display, serif",
+                        fontSize: 56,
+                        fontWeight: 700,
+                        margin: 0,
+                        textTransform: "uppercase",
+                        letterSpacing: 8,
+                        background: "linear-gradient(135deg, #1e3a8a 0%, #c9a227 50%, #1e3a8a 100%)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        textShadow: "none"
+                      }}>Bằng Khen</h1>
+                      <div style={{
+                        fontFamily: "Montserrat, Arial, sans-serif",
+                        fontSize: 15,
+                        fontWeight: 600,
+                        color: "#d4af37",
+                        letterSpacing: 4,
+                        textTransform: "uppercase",
+                        marginTop: 6
+                      }}>TOEIC ACHIEVEMENT AWARD</div>
+                    </div>
+
+                    {/* ═══ RECIPIENT ═══ */}
+                    <div style={{ textAlign: "center", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                      <div style={{
+                        fontSize: 16,
+                        color: "#475569",
+                        marginBottom: 16,
+                        fontStyle: "italic",
+                        letterSpacing: 0.5
+                      }}>Hệ thống Anh ngữ ORI trân trọng trao tặng cho</div>
+
+                      {/* === STUDENT NAME - PROMINENT === */}
+                      <div style={{
+                        fontFamily: "Great Vibes, cursive",
+                        fontSize: nameFontSize,
+                        color: "#1e3a8a",
+                        lineHeight: 1.15,
+                        padding: "12px 0",
+                        textShadow: "1px 1px 2px rgba(30,58,138,0.1)"
+                      }}>{certName}</div>
+
+                      <div style={{
+                        fontSize: 15,
+                        lineHeight: 1.7,
+                        color: "#334155",
+                        marginTop: 16,
+                        letterSpacing: 0.3
+                      }}>
+                        Đã hoàn thành xuất sắc kỳ thi thử TOEIC chuẩn quốc tế<br />
+                        với kết quả đạt được như sau:
+                      </div>
+                    </div>
+
+                    {/* ═══ SCORE BOX ═══ */}
+                    <div style={{ textAlign: "center", marginBottom: 20 }}>
+                      <div style={{
+                        display: "inline-block",
+                        padding: "20px 48px",
+                        background: "linear-gradient(180deg, #fefefe 0%, #f8f9fa 100%)",
+                        border: "2px solid #d4af37",
+                        position: "relative",
+                        boxShadow: "0 4px 12px rgba(212,175,55,0.15)"
+                      }}>
+                        <div style={{ position: "absolute", top: 5, left: 5, right: 5, bottom: 5, border: "1px solid rgba(212,175,55,0.3)", pointerEvents: "none" }} />
+
+                        <div style={{ display: "flex", gap: 48, justifyContent: "center", marginBottom: 14 }}>
+                          <div>
+                            <span style={{ fontWeight: 600, color: "#1e3a8a", fontSize: 15 }}>Listening: </span>
+                            <span style={{ fontWeight: 800, color: "#d4af37", fontSize: 24 }}>{certListening}</span>
+                          </div>
+                          <div>
+                            <span style={{ fontWeight: 600, color: "#1e3a8a", fontSize: 15 }}>Reading: </span>
+                            <span style={{ fontWeight: 800, color: "#d4af37", fontSize: 24 }}>{certReading}</span>
+                          </div>
                         </div>
-                        <div>
-                          <span style={{ fontWeight: 700, color: "#1e3a8a", fontSize: 14 }}>Reading: </span>
-                          <span style={{ fontWeight: 800, color: "#d4af37", fontSize: 20 }}>{certReading}</span>
-                        </div>
-                      </div>
-                      <div style={{ fontSize: 11, color: "#64748b", letterSpacing: 0.5, marginBottom: 4 }}>TỔNG ĐIỂM ĐẠT ĐƯỢC</div>
-                      <div style={{ fontSize: 36, fontWeight: 800, color: "#1e3a8a" }}>{certTotal}</div>
-                    </div>
-                  </div>
 
-                  {/* Signatures */}
-                  <div style={{ width: "100%", display: "flex", justifyContent: "space-around", alignItems: "flex-end" }}>
-                    <div style={{ textAlign: "center", width: 140 }}>
-                      <div style={{ height: 36, borderBottom: "2px solid #d4af37", position: "relative", marginBottom: 6 }}>
-                        <div style={{ position: "absolute", bottom: 6, left: "50%", transform: "translateX(-50%)", fontFamily: "Great Vibes, cursive", fontSize: 22, color: "#00008b", whiteSpace: "nowrap" }}>{instructorSign}</div>
+                        <div style={{ fontSize: 12, color: "#64748b", letterSpacing: 1, marginBottom: 6, textTransform: "uppercase" }}>Tổng điểm đạt được</div>
+                        <div style={{ fontSize: 44, fontWeight: 800, color: "#1e3a8a", lineHeight: 1 }}>{certTotal}</div>
                       </div>
-                      <div style={{ fontFamily: "Montserrat, Arial, sans-serif", fontWeight: 700, color: "#1e3a8a", textTransform: "uppercase", fontSize: 9, letterSpacing: 0.5 }}>Giáo viên hướng dẫn</div>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: "#333", marginTop: 3 }}>{certInstructor}</div>
                     </div>
-                    <div style={{ textAlign: "center", width: 140 }}>
-                      <div style={{ height: 36, borderBottom: "2px solid #d4af37", position: "relative", marginBottom: 6 }}>
-                        <div style={{ position: "absolute", bottom: 6, left: "50%", transform: "translateX(-50%)", fontFamily: "Great Vibes, cursive", fontSize: 22, color: "#00008b", whiteSpace: "nowrap" }}>T. N. Diễm</div>
+
+                    {/* ═══ SIGNATURES ═══ */}
+                    <div style={{ display: "flex", justifyContent: "space-between", paddingLeft: 20, paddingRight: 20 }}>
+                      <div style={{ textAlign: "center", width: 150 }}>
+                        <div style={{ height: 42, borderBottom: "2px solid #d4af37", position: "relative", marginBottom: 8 }}>
+                          <div style={{
+                            position: "absolute",
+                            bottom: 8,
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                            fontFamily: "Great Vibes, cursive",
+                            fontSize: 26,
+                            color: "#1e40af",
+                            whiteSpace: "nowrap"
+                          }}>{instructorSign}</div>
+                        </div>
+                        <div style={{ fontFamily: "Montserrat, Arial, sans-serif", fontWeight: 700, color: "#1e3a8a", textTransform: "uppercase", fontSize: 10, letterSpacing: 1 }}>Giáo viên hướng dẫn</div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: "#333", marginTop: 4 }}>{certInstructor}</div>
                       </div>
-                      <div style={{ fontFamily: "Montserrat, Arial, sans-serif", fontWeight: 700, color: "#1e3a8a", textTransform: "uppercase", fontSize: 9, letterSpacing: 0.5 }}>Giám đốc trung tâm</div>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: "#333", marginTop: 3 }}>Trần Ngọc Diễm</div>
+
+                      <div style={{ textAlign: "center", width: 150 }}>
+                        <div style={{ height: 42, borderBottom: "2px solid #d4af37", position: "relative", marginBottom: 8 }}>
+                          <div style={{
+                            position: "absolute",
+                            bottom: 8,
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                            fontFamily: "Great Vibes, cursive",
+                            fontSize: 26,
+                            color: "#1e40af",
+                            whiteSpace: "nowrap"
+                          }}>T. N. Diễm</div>
+                        </div>
+                        <div style={{ fontFamily: "Montserrat, Arial, sans-serif", fontWeight: 700, color: "#1e3a8a", textTransform: "uppercase", fontSize: 10, letterSpacing: 1 }}>Giám đốc trung tâm</div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: "#333", marginTop: 4 }}>Trần Ngọc Diễm</div>
+                      </div>
                     </div>
                   </div>
                 </div>
