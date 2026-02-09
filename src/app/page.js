@@ -239,7 +239,7 @@ export default function Home() {
           Dữ liệu lưu trên Google Sheets · {students.length} học viên
         </div>
         <div style={{ display: "flex", justifyContent: "center", gap: 5, flexWrap: "wrap" }}>
-          {[{ k: "input", l: "📝 Nhập" }, { k: "report", l: "📊 Báo cáo" }, { k: "screenshot", l: "📸 Chụp ảnh" }, { k: "history", l: "📈 Lịch sử" }, { k: "lookup", l: "🔍 Tra cứu" }].map(t =>
+          {[{ k: "input", l: "📝 Nhập" }, { k: "report", l: "📊 Báo cáo" }, { k: "screenshot", l: "📸 Chụp ảnh" }, { k: "certificate", l: "🏆 Bằng khen" }, { k: "history", l: "📈 Lịch sử" }].map(t =>
             <button key={t.k} onClick={() => setView(t.k)} className={`tag ${view === t.k ? "tag-active" : "tag-inactive"}`}>{t.l}</button>
           )}
         </div>
@@ -669,8 +669,241 @@ export default function Home() {
         </div>
       )}
 
+      {/* ═══ CERTIFICATE ═══ */}
+      {view === "certificate" && (() => {
+        const certRef = useRef(null);
+        const [certStudent, setCertStudent] = useState("");
+        const [certName, setCertName] = useState("Học Viên");
+        const [certListening, setCertListening] = useState(0);
+        const [certReading, setCertReading] = useState(0);
+        const [certTotal, setCertTotal] = useState(0);
+        const [certInstructor, setCertInstructor] = useState("Trần Ngọc Diễm");
+        const [exporting, setExporting] = useState(false);
 
-      {/* ═══ HISTORY ═══ */}
+        const loadCertStudent = async (code) => {
+          setCertStudent(code);
+          const student = students.find(s => s.code === code);
+          if (student) {
+            setCertName(student.name);
+            // Load latest score
+            const h = await api.getHistory(code);
+            if (h.scores?.length > 0) {
+              const latest = h.scores.sort((a, b) => b.month.localeCompare(a.month))[0];
+              setCertListening(latest.listening);
+              setCertReading(latest.reading);
+              setCertTotal(latest.total);
+            }
+          }
+        };
+
+        const exportImage = async () => {
+          if (!certRef.current) return;
+          setExporting(true);
+          try {
+            const html2canvas = (await import("html2canvas")).default;
+            const canvas = await html2canvas(certRef.current, {
+              scale: 2,
+              backgroundColor: "#ffffff",
+              useCORS: true,
+              logging: false
+            });
+            const link = document.createElement("a");
+            link.download = `bangkhen-${certName.replace(/\s+/g, "-")}-${Date.now()}.jpg`;
+            link.href = canvas.toDataURL("image/jpeg", 0.95);
+            link.click();
+            flash("✅ Đã tải xuống bằng khen!");
+          } catch (err) {
+            console.error(err);
+            flash("❌ Lỗi xuất ảnh", "error");
+          }
+          setExporting(false);
+        };
+
+        const today = new Date();
+        const dateStr = `TP. Hồ Chí Minh, ngày ${today.getDate()} tháng ${today.getMonth() + 1} năm ${today.getFullYear()}`;
+        const instructorSign = certInstructor === "Grace Nguyễn" ? "Grace" :
+          certInstructor === "Đỗ Ngọc Loan" ? "N. Loan" : "T. N. Diễm";
+
+        return (
+          <div>
+            {/* Controls */}
+            <div className="card" style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#FFD740", marginBottom: 12 }}>🏆 TẠO BẰNG KHEN</div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+                <div>
+                  <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>CHỌN HỌC VIÊN</label>
+                  <select
+                    className="input"
+                    value={certStudent}
+                    onChange={e => loadCertStudent(e.target.value)}
+                    style={{ width: "100%" }}
+                  >
+                    <option value="">-- Chọn hoặc nhập tay bên dưới --</option>
+                    {students.map(s => (
+                      <option key={s.code} value={s.code}>{s.name} ({s.code})</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>GIÁO VIÊN</label>
+                  <select
+                    className="input"
+                    value={certInstructor}
+                    onChange={e => setCertInstructor(e.target.value)}
+                    style={{ width: "100%" }}
+                  >
+                    <option value="Trần Ngọc Diễm">Trần Ngọc Diễm</option>
+                    <option value="Grace Nguyễn">Grace Nguyễn</option>
+                    <option value="Đỗ Ngọc Loan">Đỗ Ngọc Loan</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
+                <div>
+                  <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>TÊN</label>
+                  <input className="input" value={certName} onChange={e => setCertName(e.target.value)} style={{ width: "100%" }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>LISTENING</label>
+                  <input className="input" type="number" value={certListening} onChange={e => setCertListening(Number(e.target.value))} style={{ width: "100%" }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>READING</label>
+                  <input className="input" type="number" value={certReading} onChange={e => setCertReading(Number(e.target.value))} style={{ width: "100%" }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>TỔNG</label>
+                  <input className="input" type="number" value={certTotal} onChange={e => setCertTotal(Number(e.target.value))} style={{ width: "100%" }} />
+                </div>
+              </div>
+
+              <button
+                className="btn-primary"
+                onClick={exportImage}
+                disabled={exporting}
+                style={{ width: "100%" }}
+              >
+                {exporting ? "⏳ Đang xuất..." : "📥 TẢI XUỐNG BẰNG KHEN (JPG)"}
+              </button>
+            </div>
+
+            {/* Certificate Preview */}
+            <div ref={certRef} style={{
+              width: "100%",
+              aspectRatio: "210/297",
+              background: "#ffffff",
+              border: "12px solid #1e3a8a",
+              outline: "3px double #d4af37",
+              outlineOffset: "-8px",
+              borderRadius: 4,
+              padding: "24px 20px",
+              boxSizing: "border-box",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              alignItems: "center",
+              textAlign: "center",
+              position: "relative",
+              fontFamily: "Times New Roman, serif",
+              color: "#1e3a8a",
+              overflow: "hidden"
+            }}>
+              {/* Corner decorations */}
+              <div style={{ position: "absolute", top: 16, left: 16, width: 50, height: 50, borderTop: "3px solid #d4af37", borderLeft: "3px solid #d4af37", opacity: 0.5 }} />
+              <div style={{ position: "absolute", bottom: 16, right: 16, width: 50, height: 50, borderBottom: "3px solid #d4af37", borderRight: "3px solid #d4af37", opacity: 0.5 }} />
+
+              {/* Header */}
+              <div style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ padding: "4px 10px", background: "#1e3a8a", color: "#d4af37", fontFamily: "Arial, sans-serif", fontWeight: 700, fontSize: 10, letterSpacing: 1 }}>ORI ACADEMY</div>
+                <div style={{ fontStyle: "italic", fontSize: 9, color: "#172554" }}>{dateStr}</div>
+              </div>
+
+              {/* Title */}
+              <div style={{ marginTop: 12 }}>
+                <h1 style={{
+                  fontFamily: "Playfair Display, serif",
+                  fontSize: 32,
+                  fontWeight: 700,
+                  margin: 0,
+                  textTransform: "uppercase",
+                  letterSpacing: 3,
+                  background: "linear-gradient(to right, #1e3a8a, #d4af37, #1e3a8a)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent"
+                }}>Bằng Khen</h1>
+                <div style={{ fontFamily: "Arial, sans-serif", fontSize: 11, fontWeight: 600, color: "#d4af37", letterSpacing: 1, textTransform: "uppercase", marginTop: -2 }}>TOEIC ACHIEVEMENT AWARD</div>
+              </div>
+
+              {/* Recipient */}
+              <div>
+                <div style={{ fontSize: 11, color: "#334155", marginBottom: 4 }}>Hệ thống Anh ngữ ORI trân trọng trao tặng cho</div>
+                <div style={{
+                  fontFamily: "Great Vibes, cursive",
+                  fontSize: 36,
+                  color: "#1e3a8a",
+                  lineHeight: 1.1
+                }}>{certName}</div>
+              </div>
+
+              {/* Details */}
+              <div>
+                <div style={{ fontSize: 10, lineHeight: 1.5, color: "#1e293b", marginBottom: 8 }}>
+                  Đã hoàn thành xuất sắc kỳ thi thử TOEIC chuẩn quốc tế<br />với kết quả đạt được như sau:
+                </div>
+
+                {/* Score box */}
+                <div style={{
+                  display: "inline-block",
+                  padding: "10px 24px",
+                  background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+                  border: "2px solid #f1e4bc",
+                  position: "relative"
+                }}>
+                  <div style={{ position: "absolute", top: 3, left: 3, right: 3, bottom: 3, border: "1px solid #d4af37", pointerEvents: "none" }} />
+                  <div style={{ display: "flex", gap: 20, justifyContent: "center", marginBottom: 8 }}>
+                    <div>
+                      <span style={{ fontWeight: 700, color: "#1e3a8a", fontSize: 10 }}>Listening: </span>
+                      <span style={{ fontWeight: 800, color: "#d4af37", fontSize: 12 }}>{certListening}</span>
+                    </div>
+                    <div>
+                      <span style={{ fontWeight: 700, color: "#1e3a8a", fontSize: 10 }}>Reading: </span>
+                      <span style={{ fontWeight: 800, color: "#d4af37", fontSize: 12 }}>{certReading}</span>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 8, color: "#64748b" }}>TỔNG ĐIỂM ĐẠT ĐƯỢC</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: "#1e3a8a" }}>{certTotal}</div>
+                </div>
+              </div>
+
+              {/* Signatures */}
+              <div style={{ width: "100%", display: "flex", justifyContent: "space-around", paddingTop: 12 }}>
+                <div style={{ textAlign: "center", width: 120 }}>
+                  <div style={{ height: 40, borderBottom: "2px solid #d4af37", position: "relative" }}>
+                    <div style={{ position: "absolute", bottom: 4, left: "50%", transform: "translateX(-50%)", fontFamily: "Great Vibes, cursive", fontSize: 16, color: "#00008b", whiteSpace: "nowrap" }}>{instructorSign}</div>
+                  </div>
+                  <div style={{ fontFamily: "Arial, sans-serif", fontWeight: 700, color: "#1e3a8a", textTransform: "uppercase", fontSize: 8, marginTop: 6 }}>Giáo viên hướng dẫn</div>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: "#333", marginTop: 2 }}>{certInstructor}</div>
+                </div>
+                <div style={{ textAlign: "center", width: 120 }}>
+                  <div style={{ height: 40, borderBottom: "2px solid #d4af37", position: "relative" }}>
+                    <div style={{ position: "absolute", bottom: 4, left: "50%", transform: "translateX(-50%)", fontFamily: "Great Vibes, cursive", fontSize: 16, color: "#00008b", whiteSpace: "nowrap" }}>T. N. Diễm</div>
+                  </div>
+                  <div style={{ fontFamily: "Arial, sans-serif", fontWeight: 700, color: "#1e3a8a", textTransform: "uppercase", fontSize: 8, marginTop: 6 }}>Giám đốc trung tâm</div>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: "#333", marginTop: 2 }}>Trần Ngọc Diễm</div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ textAlign: "center", marginTop: 12, fontSize: 11, color: "var(--text-dim)" }}>
+              📸 Xem trước bằng khen · Nhấn nút tải xuống để lưu ảnh JPG
+            </div>
+          </div>
+        );
+      })()}
+
+
       {view === "history" && (
         <div>
           <div className="card">
