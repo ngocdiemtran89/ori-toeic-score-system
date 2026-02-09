@@ -877,11 +877,11 @@ export default function Home() {
                     </div>
 
                     {/* ═══ RECIPIENT ═══ */}
-                    <div style={{ textAlign: "center", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                    <div style={{ textAlign: "center" }}>
                       <div style={{
                         fontSize: 16,
                         color: "#475569",
-                        marginBottom: 16,
+                        marginBottom: 12,
                         fontStyle: "italic",
                         letterSpacing: 0.5
                       }}>Hệ thống Anh ngữ ORI trân trọng trao tặng cho</div>
@@ -892,24 +892,32 @@ export default function Home() {
                         fontSize: nameFontSize,
                         color: "#1e3a8a",
                         lineHeight: 1.15,
-                        padding: "12px 0",
+                        padding: "8px 0",
                         textShadow: "1px 1px 2px rgba(30,58,138,0.1)"
                       }}>{certName}</div>
+                    </div>
 
+                    {/* ═══ SCORE SECTION - Centered with equal spacing ═══ */}
+                    <div style={{
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: 16
+                    }}>
                       <div style={{
                         fontSize: 15,
                         lineHeight: 1.7,
                         color: "#334155",
-                        marginTop: 16,
-                        letterSpacing: 0.3
+                        letterSpacing: 0.3,
+                        textAlign: "center"
                       }}>
                         Đã hoàn thành xuất sắc kỳ thi thử TOEIC chuẩn quốc tế<br />
                         với kết quả đạt được như sau:
                       </div>
-                    </div>
 
-                    {/* ═══ SCORE BOX ═══ */}
-                    <div style={{ textAlign: "center", marginBottom: 20 }}>
+                      {/* Score box */}
                       <div style={{
                         display: "inline-block",
                         padding: "20px 48px",
