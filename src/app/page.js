@@ -518,6 +518,7 @@ export default function Home() {
           <div className="card">
             <div style={{ fontSize: 12, fontWeight: 700, color: "#FFD740", marginBottom: 12 }}>🏆 TẠO BẰNG KHEN</div>
 
+            {/* Row 1: Student + Teacher */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
               <div>
                 <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>CHỌN HỌC VIÊN</label>
@@ -526,7 +527,14 @@ export default function Home() {
                   setCertStudent(val);
                   if (val) {
                     const stu = students.find(s => s.code === val);
-                    if (stu) setCertName(stu.name);
+                    if (stu) {
+                      setCertName(stu.name);
+                      // Auto-fill scores from latest record
+                      api.getScores(val).then(d => {
+                        const latest = d.scores?.sort((a,b) => b.month.localeCompare(a.month))[0];
+                        if (latest) { setCertL(latest.listening || 0); setCertR(latest.reading || 0); }
+                      }).catch(() => {});
+                    }
                   }
                 }}>
                   <option value="">-- Chọn hoặc nhập tay bên dưới --</option>
@@ -537,46 +545,49 @@ export default function Home() {
                 <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>GIÁO VIÊN</label>
                 <select className="input" value={certTeacher} onChange={e => setCertTeacher(e.target.value)}>
                   <option>Trần Ngọc Diễm</option>
-                  <option>Grace Phạm</option>
                   <option>Đỗ Ngọc Loan</option>
+                  <option>Grace Phạm</option>
                 </select>
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
+            {/* Row 2: Name + Scores */}
+            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
               <div>
-                <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>TÊN</label>
-                <input className="input" type="text" value={certName} onChange={e => setCertName(e.target.value)} style={{ width: "100%" }} />
+                <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>TÊN HỌC VIÊN</label>
+                <input className="input" type="text" value={certName} onChange={e => setCertName(e.target.value)} placeholder="Nhập tên..." style={{ width: "100%" }} />
               </div>
               <div>
                 <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>LISTENING</label>
-                <input className="input" type="number" value={certL} onChange={e => setCertL(Math.min(495, Math.max(0, Number(e.target.value))))} style={{ width: "100%" }} />
+                <input className="input" type="number" min="0" max="495" value={certL} onChange={e => setCertL(Math.min(495, Math.max(0, Number(e.target.value) || 0)))} style={{ width: "100%" }} />
               </div>
               <div>
                 <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>READING</label>
-                <input className="input" type="number" value={certR} onChange={e => setCertR(Math.min(495, Math.max(0, Number(e.target.value))))} style={{ width: "100%" }} />
+                <input className="input" type="number" min="0" max="495" value={certR} onChange={e => setCertR(Math.min(495, Math.max(0, Number(e.target.value) || 0)))} style={{ width: "100%" }} />
               </div>
               <div>
                 <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>TỔNG</label>
-                <div className="input mono" style={{ width: "100%", display: "flex", alignItems: "center", fontSize: 16, fontWeight: 900, color: "#FFD740", background: "rgba(255,215,64,0.06)", border: "1px solid rgba(255,215,64,0.15)" }}>
+                <div className="input mono" style={{ width: "100%", display: "flex", alignItems: "center", fontSize: 18, fontWeight: 900, color: "#FFD740", background: "rgba(255,215,64,0.06)", border: "1px solid rgba(255,215,64,0.2)", justifyContent: "center", letterSpacing: 1 }}>
                   {certTotal}
                 </div>
               </div>
             </div>
 
+            {/* Download button */}
             <button className="btn-primary" onClick={async () => {
               try {
                 if (typeof window.html2canvas === 'undefined') {
                   const script = document.createElement('script');
                   script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
                   document.head.appendChild(script);
-                  await new Promise(res => script.onload = res);
+                  await new Promise(res => { script.onload = res; script.onerror = () => res(); });
                 }
                 const el = certRef.current;
                 if (!el) return;
-                const canvas = await window.html2canvas(el, { scale: 3, useCORS: true, backgroundColor: "#ffffff" });
+                flash("⏳ Đang tạo ảnh...");
+                const canvas = await window.html2canvas(el, { scale: 3, useCORS: true, backgroundColor: "#ffffff", logging: false });
                 const link = document.createElement('a');
-                link.download = `bangkhen-${certName.replace(/\s+/g, '-')}.jpg`;
+                link.download = `BangKhen-${certName.replace(/\s+/g, '-')}-${certTotal}.jpg`;
                 link.href = canvas.toDataURL('image/jpeg', 0.95);
                 link.click();
                 flash("✅ Đã tải bằng khen!");
@@ -593,125 +604,187 @@ export default function Home() {
             📸 Xem trước bằng khen · Nhấn nút tải xuống để lưu ảnh JPG
           </div>
 
+          {/* ══════════════════════════════════════════════════════════
+              BẰNG KHEN — Premium A4 Portrait Design
+              Nền trắng, viền vàng gold 15px, font Times + Playfair + Great Vibes
+              ══════════════════════════════════════════════════════════ */}
           <div ref={certRef} style={{
-            width: "100%", aspectRatio: "0.707/1", background: "#ffffff",
-            borderRadius: 0, overflow: "hidden", position: "relative",
-            fontFamily: "'Cormorant Garamond', 'Georgia', serif",
+            width: "100%", maxWidth: 560, margin: "0 auto",
+            aspectRatio: "210/297", /* A4 portrait */
+            background: "#ffffff",
+            position: "relative", overflow: "hidden",
+            fontFamily: "'Times New Roman', 'Georgia', serif",
+            color: "#333",
           }}>
-            {/* Blue left accent bar */}
-            <div style={{ position: "absolute", top: 0, left: 0, width: 18, height: "100%", background: "linear-gradient(180deg, #1a3a7a, #2856a6)" }} />
+            {/* === Outer gold border === */}
+            <div style={{ position: "absolute", inset: 0, border: "14px solid #d4af37" }} />
 
-            {/* Gold border frame */}
+            {/* === Inner gold line === */}
+            <div style={{ position: "absolute", inset: 20, border: "2px solid #d4af37" }} />
+
+            {/* === Corner ornaments === */}
+            {[[0,0,"top","left"],[0,1,"top","right"],[1,0,"bottom","left"],[1,1,"bottom","right"]].map(([r,c,v,h]) => (
+              <div key={`${v}${h}`} style={{
+                position: "absolute", [v]: 24, [h]: 24,
+                width: 36, height: 36,
+                [`border${v.charAt(0).toUpperCase()+v.slice(1)}`]: "3px solid #b8972f",
+                [`border${h.charAt(0).toUpperCase()+h.slice(1)}`]: "3px solid #b8972f",
+              }} />
+            ))}
+
+            {/* === Content area === */}
             <div style={{
-              position: "absolute", top: 20, left: 34, right: 20, bottom: 20,
-              border: "2px solid #c9a84c",
+              position: "relative", zIndex: 1,
+              display: "flex", flexDirection: "column", alignItems: "center",
+              height: "100%", textAlign: "center",
+              padding: "8% 10% 6%",
             }}>
-              {/* Corner accents */}
-              <div style={{ position: "absolute", top: -3, left: -3, width: 24, height: 24, borderTop: "3px solid #c9a84c", borderLeft: "3px solid #c9a84c" }} />
-              <div style={{ position: "absolute", top: -3, right: -3, width: 24, height: 24, borderTop: "3px solid #c9a84c", borderRight: "3px solid #c9a84c" }} />
-              <div style={{ position: "absolute", bottom: -3, left: -3, width: 24, height: 24, borderBottom: "3px solid #c9a84c", borderLeft: "3px solid #c9a84c" }} />
-              <div style={{ position: "absolute", bottom: -3, right: -3, width: 24, height: 24, borderBottom: "3px solid #c9a84c", borderRight: "3px solid #c9a84c" }} />
-            </div>
 
-            {/* Content */}
-            <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", height: "100%", textAlign: "center", padding: "30px 50px 24px 50px" }}>
-
-              {/* Header row */}
-              <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "flex-start", marginBottom: 6 }}>
-                <div style={{ background: "#1a3a7a", color: "#ffffff", padding: "5px 14px", fontWeight: 800, fontSize: 10, letterSpacing: 3, fontFamily: "system-ui, sans-serif" }}>
+              {/* ── Header: Logo + Date ── */}
+              <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center", marginBottom: "3%" }}>
+                <div style={{
+                  background: "linear-gradient(135deg, #1a3a7a, #2856a6)",
+                  color: "#fff", padding: "6px 18px",
+                  fontWeight: 800, fontSize: 11, letterSpacing: 3,
+                  fontFamily: "system-ui, Arial, sans-serif",
+                }}>
                   ORI ACADEMY
                 </div>
-                <div style={{ fontSize: 10, color: "#555", fontStyle: "italic", fontFamily: "'Cormorant Garamond', serif" }}>
+                <div style={{ fontSize: 11, color: "#777", fontStyle: "italic" }}>
                   TP. Hồ Chí Minh, ngày {new Date().getDate()} tháng {new Date().getMonth() + 1} năm {new Date().getFullYear()}
                 </div>
               </div>
 
-              {/* Main title */}
+              {/* ── Gold divider ── */}
+              <div style={{ width: "60%", height: 2, background: "linear-gradient(90deg, transparent, #d4af37, transparent)", marginBottom: "3%" }} />
+
+              {/* ── Title ── */}
               <div style={{
                 fontFamily: "'Playfair Display', 'Georgia', serif",
-                fontSize: 42, fontWeight: 900, color: "#1a3a7a",
-                letterSpacing: 10, textTransform: "uppercase",
-                margin: "12px 0 6px",
-                background: "linear-gradient(180deg, #1a3a7a 0%, #2856a6 100%)",
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                fontSize: 48, fontWeight: 900,
+                color: "#8b4513", letterSpacing: 10,
+                textTransform: "uppercase",
+                textShadow: "1px 1px 2px rgba(139,69,19,0.15)",
+                marginBottom: 4,
               }}>
                 BẰNG KHEN
               </div>
 
-              <div style={{ fontSize: 9, letterSpacing: 5, color: "#c9a84c", textTransform: "uppercase", fontWeight: 700, fontFamily: "system-ui, sans-serif", marginBottom: 2 }}>
+              <div style={{
+                fontSize: 11, letterSpacing: 5,
+                color: "#d4af37", textTransform: "uppercase",
+                fontWeight: 600, fontFamily: "system-ui, sans-serif",
+                marginBottom: "1%",
+              }}>
                 TOEIC ACHIEVEMENT AWARD
               </div>
-              <div style={{ fontSize: 12, color: "#555", fontStyle: "italic", marginBottom: 10 }}>
+
+              <div style={{ fontSize: 13, color: "#666", fontStyle: "italic", marginBottom: "3%" }}>
                 Hệ thống Anh ngữ ORI trân trọng trao tặng cho
               </div>
 
-              {/* Student Name */}
+              {/* ── Student Name ── */}
               <div style={{
-                fontFamily: "'Dancing Script', cursive",
-                fontSize: 36, fontWeight: 700, color: "#1a3a7a",
-                margin: "6px 0 12px",
+                fontFamily: "'Dancing Script', 'Great Vibes', cursive",
+                fontSize: 42, fontWeight: 700,
+                color: "#1a3a7a",
+                marginBottom: "1%",
                 lineHeight: 1.2,
+                textShadow: "1px 2px 4px rgba(0,0,0,0.08)",
               }}>
-                {certName}
+                {certName || "Họ và Tên"}
               </div>
 
-              {/* Description */}
-              <div style={{ fontSize: 12, color: "#444", lineHeight: 1.6, marginBottom: 14, maxWidth: 340 }}>
+              {/* ── Gold divider small ── */}
+              <div style={{ width: "30%", height: 1, background: "linear-gradient(90deg, transparent, #d4af37, transparent)", margin: "2% 0" }} />
+
+              {/* ── Description ── */}
+              <div style={{ fontSize: 13, color: "#555", lineHeight: 1.7, marginBottom: "3%", maxWidth: "85%" }}>
                 Đã hoàn thành xuất sắc kỳ thi thử TOEIC chuẩn quốc tế
                 <br />với kết quả đạt được như sau:
               </div>
 
-              {/* Score box */}
+              {/* ── Score Box ── */}
               <div style={{
-                border: "1.5px solid #c9a84c", padding: "12px 28px 14px",
-                marginBottom: 14, minWidth: 240,
+                border: "2px solid #d4af37",
+                padding: "16px 36px 20px",
+                marginBottom: "4%",
+                position: "relative",
+                minWidth: "55%",
               }}>
-                <div style={{ display: "flex", justifyContent: "center", gap: 30, marginBottom: 8 }}>
+                {/* Corner decorations for score box */}
+                {[["top","left"],["top","right"],["bottom","left"],["bottom","right"]].map(([v,h]) => (
+                  <div key={`s${v}${h}`} style={{
+                    position: "absolute", [v]: -4, [h]: -4,
+                    width: 12, height: 12,
+                    [`border${v.charAt(0).toUpperCase()+v.slice(1)}`]: "2px solid #b8972f",
+                    [`border${h.charAt(0).toUpperCase()+h.slice(1)}`]: "2px solid #b8972f",
+                  }} />
+                ))}
+
+                <div style={{ display: "flex", justifyContent: "center", gap: 40, marginBottom: 10 }}>
                   <div style={{ textAlign: "center" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#333", letterSpacing: 1, marginBottom: 2 }}>Listening</div>
-                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 900, color: "#1a3a7a" }}>{certL}</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#555", letterSpacing: 1, marginBottom: 4 }}>Listening</div>
+                    <div style={{
+                      fontFamily: "'Playfair Display', serif",
+                      fontSize: 30, fontWeight: 900, color: "#1a3a7a",
+                    }}>{certL}</div>
                   </div>
                   <div style={{ textAlign: "center" }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#333", letterSpacing: 1, marginBottom: 2 }}>Reading</div>
-                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 900, color: "#1a3a7a" }}>{certR}</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#555", letterSpacing: 1, marginBottom: 4 }}>Reading</div>
+                    <div style={{
+                      fontFamily: "'Playfair Display', serif",
+                      fontSize: 30, fontWeight: 900, color: "#1a3a7a",
+                    }}>{certR}</div>
                   </div>
                 </div>
-                <div style={{ fontSize: 8, letterSpacing: 3, color: "#888", textTransform: "uppercase", marginBottom: 2, fontFamily: "system-ui, sans-serif" }}>
+
+                <div style={{ width: "60%", height: 1, background: "#d4af37", margin: "0 auto 8px", opacity: 0.4 }} />
+
+                <div style={{ fontSize: 9, letterSpacing: 3, color: "#999", textTransform: "uppercase", fontFamily: "system-ui, sans-serif", marginBottom: 4 }}>
                   TỔNG ĐIỂM ĐẠT ĐƯỢC
                 </div>
                 <div style={{
                   fontFamily: "'Playfair Display', serif",
-                  fontSize: 36, fontWeight: 900, color: "#c9a84c",
+                  fontSize: 42, fontWeight: 900,
+                  color: "#d4af37",
                   lineHeight: 1,
+                  textShadow: "1px 1px 3px rgba(212,175,55,0.2)",
                 }}>
                   {certTotal}
                 </div>
               </div>
 
-              {/* Spacer */}
+              {/* ── Spacer ── */}
               <div style={{ flex: 1 }} />
 
-              {/* Divider line */}
-              <div style={{ width: "80%", height: 1, background: "#c9a84c", marginBottom: 12, opacity: 0.4 }} />
+              {/* ── Gold divider before signatures ── */}
+              <div style={{ width: "70%", height: 1, background: "linear-gradient(90deg, transparent, #d4af37, transparent)", marginBottom: "4%" }} />
 
-              {/* Signatures */}
+              {/* ── Signatures ── */}
               <div style={{ display: "flex", justifyContent: "space-around", width: "100%" }}>
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ fontFamily: "'Dancing Script', cursive", fontSize: 18, color: "#1a3a7a", marginBottom: 2 }}>
-                    {certTeacher.split(" ").map(w => w[0]).join(". ")}.
+                {[
+                  { role: "GIÁO VIÊN HƯỚNG DẪN", name: certTeacher },
+                  { role: "GIÁM ĐỐC TRUNG TÂM", name: certTeacher },
+                ].map((sig, i) => (
+                  <div key={i} style={{ textAlign: "center", minWidth: 140 }}>
+                    <div style={{
+                      fontFamily: "'Dancing Script', cursive",
+                      fontSize: 20, color: "#1a3a7a",
+                      marginBottom: 4,
+                    }}>
+                      {sig.name.split(" ").map(w => w.charAt(0)).join(". ")}.
+                    </div>
+                    <div style={{ width: 120, height: 1, background: "#999", margin: "4px auto 6px" }} />
+                    <div style={{
+                      fontSize: 8, letterSpacing: 2, color: "#999",
+                      textTransform: "uppercase",
+                      fontFamily: "system-ui, sans-serif",
+                      marginBottom: 3,
+                    }}>{sig.role}</div>
+                    <div style={{ fontSize: 12, color: "#444", fontWeight: 500 }}>{sig.name}</div>
                   </div>
-                  <div style={{ width: 100, height: 1, background: "#333", margin: "3px auto 4px" }} />
-                  <div style={{ fontSize: 7, letterSpacing: 2, color: "#888", textTransform: "uppercase", fontFamily: "system-ui, sans-serif" }}>GIÁO VIÊN HƯỚNG DẪN</div>
-                  <div style={{ fontSize: 11, color: "#333", marginTop: 2 }}>{certTeacher}</div>
-                </div>
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ fontFamily: "'Dancing Script', cursive", fontSize: 18, color: "#1a3a7a", marginBottom: 2 }}>
-                    {certTeacher.split(" ").map(w => w[0]).join(". ")}.
-                  </div>
-                  <div style={{ width: 100, height: 1, background: "#333", margin: "3px auto 4px" }} />
-                  <div style={{ fontSize: 7, letterSpacing: 2, color: "#888", textTransform: "uppercase", fontFamily: "system-ui, sans-serif" }}>GIÁM ĐỐC TRUNG TÂM</div>
-                  <div style={{ fontSize: 11, color: "#333", marginTop: 2 }}>{certTeacher}</div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
