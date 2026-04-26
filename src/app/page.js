@@ -120,6 +120,12 @@ export default function Home() {
   const [lookupQ, setLookupQ] = useState("");
   const [lookupResults, setLookupResults] = useState([]);
 
+  // Autocomplete suggestions
+  const [nameSuggestions, setNameSuggestions] = useState([]);
+  const [phoneSuggestions, setPhoneSuggestions] = useState([]);
+  const [showNameDrop, setShowNameDrop] = useState(false);
+  const [showPhoneDrop, setShowPhoneDrop] = useState(false);
+
   // Certificate
   const certRef = useRef(null);
   const [certStudent, setCertStudent] = useState("");
@@ -143,11 +149,48 @@ export default function Home() {
       const f = d.students?.[0];
       if (f && f.code.toUpperCase() === code.toUpperCase()) { setName(f.name); setPhone(f.phone); setCode(f.code); flash(`Tìm thấy: ${f.name}`); return; }
     }
-    if (phone && phone.length >= 9) {
+    if (phone && phone.length >= 6) {
       const d = await api.getStudents(phone);
       const f = d.students?.[0];
       if (f) { setName(f.name); setCode(f.code); flash(`Tìm thấy: ${f.name}`); return; }
     }
+  };
+
+  // Autocomplete filter (client-side from loaded list)
+  const filterByName = (val) => {
+    setName(val);
+    if (val.length >= 1) {
+      const q = val.toLowerCase();
+      const matches = students.filter(s =>
+        s.name.toLowerCase().includes(q)
+      ).slice(0, 6);
+      setNameSuggestions(matches);
+      setShowNameDrop(matches.length > 0);
+    } else {
+      setShowNameDrop(false);
+    }
+  };
+
+  const filterByPhone = (val) => {
+    setPhone(val);
+    if (val.length >= 3) {
+      const matches = students.filter(s =>
+        s.phone && s.phone.includes(val)
+      ).slice(0, 6);
+      setPhoneSuggestions(matches);
+      setShowPhoneDrop(matches.length > 0);
+    } else {
+      setShowPhoneDrop(false);
+    }
+  };
+
+  const selectSuggestion = (s) => {
+    setName(s.name);
+    setPhone(s.phone || "");
+    setCode(s.code || "");
+    setShowNameDrop(false);
+    setShowPhoneDrop(false);
+    flash(`Đã chọn: ${s.name}`);
   };
 
   // Parse text
@@ -262,13 +305,61 @@ export default function Home() {
             <div style={{ fontSize: 11, color: "var(--text-dim)", letterSpacing: 1, marginBottom: 10, textTransform: "uppercase" }}>Thông tin học viên</div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
-              <div>
+              <div style={{ position: "relative" }}>
                 <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 3 }}>HỌ TÊN *</label>
-                <input className="input" value={name} onChange={e => setName(e.target.value)} placeholder="Gia Huy" />
+                <input
+                  className="input"
+                  value={name}
+                  onChange={e => filterByName(e.target.value)}
+                  onFocus={() => name.length >= 1 && setShowNameDrop(nameSuggestions.length > 0)}
+                  onBlur={() => setTimeout(() => setShowNameDrop(false), 180)}
+                  placeholder="Gia Huy"
+                  autoComplete="off"
+                />
+                {showNameDrop && (
+                  <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#1e1e2e", border: "1px solid rgba(255,107,53,0.3)", borderRadius: 8, zIndex: 100, overflow: "hidden", boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
+                    {nameSuggestions.map(s => (
+                      <div
+                        key={s.code}
+                        onMouseDown={() => selectSuggestion(s)}
+                        style={{ padding: "8px 12px", cursor: "pointer", borderBottom: "1px solid rgba(255,255,255,0.04)", fontSize: 13 }}
+                        onMouseEnter={e => e.currentTarget.style.background = "rgba(255,107,53,0.15)"}
+                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                      >
+                        <div style={{ fontWeight: 600, color: "#fff" }}>{s.name}</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{s.phone || ""} · {s.code}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div>
+              <div style={{ position: "relative" }}>
                 <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 3 }}>SỐ ĐIỆN THOẠI</label>
-                <input className="input" value={phone} onChange={e => setPhone(e.target.value)} placeholder="0901234567" onBlur={autoFill} />
+                <input
+                  className="input"
+                  value={phone}
+                  onChange={e => filterByPhone(e.target.value)}
+                  onFocus={() => phone.length >= 3 && setShowPhoneDrop(phoneSuggestions.length > 0)}
+                  onBlur={() => setTimeout(() => setShowPhoneDrop(false), 180)}
+                  placeholder="0901234567"
+                  autoComplete="off"
+                />
+                {showPhoneDrop && (
+                  <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#1e1e2e", border: "1px solid rgba(0,201,167,0.3)", borderRadius: 8, zIndex: 100, overflow: "hidden", boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
+                    {phoneSuggestions.map(s => (
+                      <div
+                        key={s.code}
+                        onMouseDown={() => selectSuggestion(s)}
+                        style={{ padding: "8px 12px", cursor: "pointer", borderBottom: "1px solid rgba(255,255,255,0.04)", fontSize: 13 }}
+                        onMouseEnter={e => e.currentTarget.style.background = "rgba(0,201,167,0.15)"}
+                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                      >
+                        <div style={{ fontWeight: 600, color: "#fff" }}>{s.phone}</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{s.name} · {s.code}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
