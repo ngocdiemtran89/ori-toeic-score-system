@@ -4,39 +4,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 // ─── TOEIC Constants (client-side) ────────────────────────────
-const LISTENING_TABLE = [5, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 200, 205, 210, 215, 220, 225, 230, 235, 240, 245, 250, 255, 260, 265, 270, 275, 280, 285, 290, 295, 300, 305, 310, 315, 320, 325, 330, 335, 340, 345, 350, 355, 360, 365, 370, 375, 380, 385, 395, 400, 405, 410, 415, 420, 425, 430, 435, 440, 445, 450, 455, 460, 465, 470, 475, 480, 485, 490, 495, 495, 495, 495, 495];
-const READING_TABLE = [5, 5, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 200, 205, 210, 215, 220, 225, 230, 235, 240, 245, 250, 255, 260, 265, 270, 275, 280, 285, 290, 295, 300, 305, 310, 315, 320, 325, 330, 335, 340, 345, 350, 355, 360, 365, 370, 375, 380, 385, 390, 395, 400, 405, 410, 415, 420, 425, 430, 435, 440, 445, 450, 455, 460, 465, 470, 475, 480, 485, 490, 495];
-const PM = { P1: 6, P2: 25, P3: 39, P4: 30, P5: 30, P6: 16, P7: 54 };
-const LP = ["P1", "P2", "P3", "P4"], RP = ["P5", "P6", "P7"], AP = [...LP, ...RP];
-const STANDARDS = { 450: { L: { P1: 3, P2: 10, P3: 12, P4: 10 }, R: { P5: 12, P6: 5, P7: 20 } }, 500: { L: { P1: 3, P2: 13, P3: 16, P4: 12 }, R: { P5: 15, P6: 7, P7: 26 } }, 550: { L: { P1: 4, P2: 16, P3: 20, P4: 18 }, R: { P5: 18, P6: 8, P7: 32 } }, 600: { L: { P1: 5, P2: 19, P3: 24, P4: 22 }, R: { P5: 22, P6: 10, P7: 38 } }, 650: { L: { P1: 5, P2: 21, P3: 28, P4: 24 }, R: { P5: 24, P6: 12, P7: 42 } }, 700: { L: { P1: 6, P2: 23, P3: 32, P4: 26 }, R: { P5: 26, P6: 13, P7: 46 } }, 750: { L: { P1: 6, P2: 24, P3: 34, P4: 28 }, R: { P5: 28, P6: 14, P7: 48 } }, 800: { L: { P1: 6, P2: 25, P3: 36, P4: 28 }, R: { P5: 28, P6: 15, P7: 50 } } };
+const LISTENING_TABLE=[5,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,105,110,115,120,125,130,135,140,145,150,155,160,165,170,175,180,185,190,195,200,205,210,215,220,225,230,235,240,245,250,255,260,265,270,275,280,285,290,295,300,305,310,315,320,325,330,335,340,345,350,355,360,365,370,375,380,385,395,400,405,410,415,420,425,430,435,440,445,450,455,460,465,470,475,480,485,490,495,495,495,495,495];
+const READING_TABLE=[5,5,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,105,110,115,120,125,130,135,140,145,150,155,160,165,170,175,180,185,190,195,200,205,210,215,220,225,230,235,240,245,250,255,260,265,270,275,280,285,290,295,300,305,310,315,320,325,330,335,340,345,350,355,360,365,370,375,380,385,390,395,400,405,410,415,420,425,430,435,440,445,450,455,460,465,470,475,480,485,490,495];
+const PM={P1:6,P2:25,P3:39,P4:30,P5:30,P6:16,P7:54};
+const LP=["P1","P2","P3","P4"], RP=["P5","P6","P7"], AP=[...LP,...RP];
+const STANDARDS={450:{L:{P1:3,P2:10,P3:12,P4:10},R:{P5:12,P6:5,P7:20}},500:{L:{P1:3,P2:13,P3:16,P4:12},R:{P5:15,P6:7,P7:26}},550:{L:{P1:4,P2:16,P3:20,P4:18},R:{P5:18,P6:8,P7:32}},600:{L:{P1:5,P2:19,P3:24,P4:22},R:{P5:22,P6:10,P7:38}},650:{L:{P1:5,P2:21,P3:28,P4:24},R:{P5:24,P6:12,P7:42}},700:{L:{P1:6,P2:23,P3:32,P4:26},R:{P5:26,P6:13,P7:46}},750:{L:{P1:6,P2:24,P3:34,P4:28},R:{P5:28,P6:14,P7:48}},800:{L:{P1:6,P2:25,P3:36,P4:28},R:{P5:28,P6:15,P7:50}}};
 
-function calc(sc) { const l = LP.reduce((s, p) => s + (sc[p] || 0), 0), r = RP.reduce((s, p) => s + (sc[p] || 0), 0); return { listening: LISTENING_TABLE[Math.min(100, l)], reading: READING_TABLE[Math.min(100, r)], total: LISTENING_TABLE[Math.min(100, l)] + READING_TABLE[Math.min(100, r)], lCorrect: l, rCorrect: r }; }
-function findLvl(t) { const l = Object.keys(STANDARDS).map(Number).sort((a, b) => a - b); let c = l[0]; for (const v of l) if (t >= v) c = v; return c; }
-function nextTgt(t) { const l = Object.keys(STANDARDS).map(Number).sort((a, b) => a - b); for (const v of l) if (v > t) return v; return l[l.length - 1] + 50; }
-function genTgt(cur, lvl) { const s = STANDARDS[lvl]; if (!s) return null; const t = {}; AP.forEach(p => { const sec = LP.includes(p) ? "L" : "R"; const tg = s[sec][p], c = cur[p] || 0; t[p] = { current: c, target: tg, diff: Math.max(0, tg - c), exceeded: c >= tg }; }); return t; }
-
-// Calculate extra questions needed for target score increase
-function calcExtraNeeded(currentL, currentR, targetIncrease) {
-  const currentTotal = LISTENING_TABLE[Math.min(100, currentL)] + READING_TABLE[Math.min(100, currentR)];
-  const targetTotal = currentTotal + targetIncrease;
-
-  // Try adding questions evenly to L and R
-  let extraL = 0, extraR = 0;
-  let testL = currentL, testR = currentR;
-
-  while (LISTENING_TABLE[Math.min(100, testL)] + READING_TABLE[Math.min(100, testR)] < targetTotal && (testL < 100 || testR < 100)) {
-    // Alternate adding to L and R, prioritize the one with more room for improvement
-    if (testL < 100 && (testR >= 100 || (100 - testL) >= (100 - testR))) {
-      testL++; extraL++;
-    } else if (testR < 100) {
-      testR++; extraR++;
-    } else break;
-  }
-
-  const achievedTotal = LISTENING_TABLE[Math.min(100, testL)] + READING_TABLE[Math.min(100, testR)];
-  return { extraL, extraR, extraTotal: extraL + extraR, achievedTotal, possible: achievedTotal >= targetTotal };
-}
-
+function calc(sc){const l=LP.reduce((s,p)=>s+(sc[p]||0),0),r=RP.reduce((s,p)=>s+(sc[p]||0),0);return{listening:LISTENING_TABLE[Math.min(100,l)],reading:READING_TABLE[Math.min(100,r)],total:LISTENING_TABLE[Math.min(100,l)]+READING_TABLE[Math.min(100,r)],lCorrect:l,rCorrect:r};}
+function findLvl(t){const l=Object.keys(STANDARDS).map(Number).sort((a,b)=>a-b);let c=l[0];for(const v of l)if(t>=v)c=v;return c;}
+function nextTgt(t){const l=Object.keys(STANDARDS).map(Number).sort((a,b)=>a-b);for(const v of l)if(v>t)return v;return l[l.length-1]+50;}
+function genTgt(cur,lvl){const s=STANDARDS[lvl];if(!s)return null;const t={};AP.forEach(p=>{const sec=LP.includes(p)?"L":"R";const tg=s[sec][p],c=cur[p]||0;t[p]={current:c,target:tg,diff:Math.max(0,tg-c),exceeded:c>=tg};});return t;}
 
 // ─── API helpers ──────────────────────────────────────────────
 const api = {
@@ -46,7 +23,7 @@ const api = {
     return r.json();
   },
   async saveStudent(data) {
-    const r = await fetch("/api/students", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    const r = await fetch("/api/students", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(data) });
     return r.json();
   },
   async getScores(code) {
@@ -54,39 +31,39 @@ const api = {
     return r.json();
   },
   async saveScore(data) {
-    const r = await fetch("/api/scores", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    const r = await fetch("/api/scores", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(data) });
     return r.json();
   },
   async analyze(data) {
-    const r = await fetch("/api/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    const r = await fetch("/api/analyze", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(data) });
     return r.json();
   },
 };
 
 // ─── Components ───────────────────────────────────────────────
-function Ring({ value, max, size = 100, color = "#FF6B35", label, score }) {
-  const pct = Math.min(100, (value / max) * 100), r = (size - 10) / 2, circ = 2 * Math.PI * r, off = circ - (pct / 100) * circ;
-  return (<div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-    <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}><circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={6} /><circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={6} strokeDasharray={circ} strokeDashoffset={off} strokeLinecap="round" style={{ transition: "stroke-dashoffset 1s" }} /></svg>
-    <div style={{ marginTop: -size + 8, height: size - 16, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}><span className="mono" style={{ fontSize: size * 0.24, fontWeight: 900, color }}>{score}</span><span style={{ fontSize: size * 0.11, color: "rgba(255,255,255,0.3)" }}>{value}/{max}</span></div>
-    {label && <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginTop: 8, letterSpacing: 1.5, textTransform: "uppercase" }}>{label}</span>}
+function Ring({value,max,size=100,color="#FF6B35",label,score}){
+  const pct=Math.min(100,(value/max)*100),r=(size-10)/2,circ=2*Math.PI*r,off=circ-(pct/100)*circ;
+  return(<div style={{display:"flex",flexDirection:"column",alignItems:"center"}}>
+    <svg width={size} height={size} style={{transform:"rotate(-90deg)"}}><circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={6}/><circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={6} strokeDasharray={circ} strokeDashoffset={off} strokeLinecap="round" style={{transition:"stroke-dashoffset 1s"}}/></svg>
+    <div style={{marginTop:-size+8,height:size-16,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}><span className="mono" style={{fontSize:size*0.24,fontWeight:900,color}}>{score}</span><span style={{fontSize:size*0.11,color:"rgba(255,255,255,0.3)"}}>{value}/{max}</span></div>
+    {label&&<span style={{fontSize:10,color:"rgba(255,255,255,0.4)",marginTop:8,letterSpacing:1.5,textTransform:"uppercase"}}>{label}</span>}
   </div>);
 }
 
-function PartBar({ part, current, max, target, prev }) {
-  const pct = (current / max) * 100, tPct = target ? (target / max) * 100 : 0, diff = prev != null ? current - prev : null, isL = LP.includes(part), col = isL ? "#FF6B35" : "#00C9A7";
-  return (<div style={{ marginBottom: 11 }}>
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: col, width: 24 }}>{part}</span>
-        <span style={{ fontSize: 13, color: "#fff", fontWeight: 600 }}>{current}/{max}</span>
-        {diff != null && diff !== 0 && <span style={{ fontSize: 11, fontWeight: 700, color: diff > 0 ? "#00E676" : "#FF5252", background: diff > 0 ? "rgba(0,230,118,0.1)" : "rgba(255,82,82,0.1)", padding: "1px 6px", borderRadius: 4 }}>{diff > 0 ? `+${diff}` : diff}</span>}
+function PartBar({part,current,max,target,prev}){
+  const pct=(current/max)*100,tPct=target?(target/max)*100:0,diff=prev!=null?current-prev:null,isL=LP.includes(part),col=isL?"#FF6B35":"#00C9A7";
+  return(<div style={{marginBottom:11}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+      <div style={{display:"flex",alignItems:"center",gap:8}}>
+        <span className="mono" style={{fontSize:12,fontWeight:700,color:col,width:24}}>{part}</span>
+        <span style={{fontSize:13,color:"#fff",fontWeight:600}}>{current}/{max}</span>
+        {diff!=null&&diff!==0&&<span style={{fontSize:11,fontWeight:700,color:diff>0?"#00E676":"#FF5252",background:diff>0?"rgba(0,230,118,0.1)":"rgba(255,82,82,0.1)",padding:"1px 6px",borderRadius:4}}>{diff>0?`+${diff}`:diff}</span>}
       </div>
-      {target != null && <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>🎯 {target}/{max}</span>}
+      {target!=null&&<span style={{fontSize:11,color:"rgba(255,255,255,0.3)"}}>🎯 {target}/{max}</span>}
     </div>
-    <div style={{ position: "relative", height: 7, background: "rgba(255,255,255,0.05)", borderRadius: 4, overflow: "hidden" }}>
-      <div style={{ height: "100%", width: `${pct}%`, background: col, borderRadius: 4, transition: "width 0.8s ease-out" }} />
-      {target != null && <div style={{ position: "absolute", top: 0, left: `${tPct}%`, width: 2, height: "100%", background: "#FFD740" }} />}
+    <div style={{position:"relative",height:7,background:"rgba(255,255,255,0.05)",borderRadius:4,overflow:"hidden"}}>
+      <div style={{height:"100%",width:`${pct}%`,background:col,borderRadius:4,transition:"width 0.8s ease-out"}}/>
+      {target!=null&&<div style={{position:"absolute",top:0,left:`${tPct}%`,width:2,height:"100%",background:"#FFD740"}}/>}
     </div>
   </div>);
 }
@@ -104,8 +81,8 @@ export default function Home() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
-  const [month, setMonth] = useState(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; });
-  const [scores, setScores] = useState({ P1: "", P2: "", P3: "", P4: "", P5: "", P6: "", P7: "" });
+  const [month, setMonth] = useState(() => {const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;});
+  const [scores, setScores] = useState({P1:"",P2:"",P3:"",P4:"",P5:"",P6:"",P7:""});
   const [inputMode, setInputMode] = useState("manual");
   const [textInput, setTextInput] = useState("");
 
@@ -119,28 +96,26 @@ export default function Home() {
   const [selHistory, setSelHistory] = useState([]);
   const [lookupQ, setLookupQ] = useState("");
   const [lookupResults, setLookupResults] = useState([]);
-
-  // Autocomplete suggestions
-  const [nameSuggestions, setNameSuggestions] = useState([]);
-  const [phoneSuggestions, setPhoneSuggestions] = useState([]);
+  // Autocomplete
+  const [nameSugg, setNameSugg] = useState([]);
+  const [phoneSugg, setPhoneSugg] = useState([]);
   const [showNameDrop, setShowNameDrop] = useState(false);
   const [showPhoneDrop, setShowPhoneDrop] = useState(false);
 
-  // Certificate
-  const certRef = useRef(null);
+  // Bằng khen
   const [certStudent, setCertStudent] = useState("");
   const [certName, setCertName] = useState("Học Viên");
-  const [certListening, setCertListening] = useState(0);
-  const [certReading, setCertReading] = useState(0);
-  const [certTotal, setCertTotal] = useState(0);
-  const [certInstructor, setCertInstructor] = useState("Trần Ngọc Diễm");
-  const [exporting, setExporting] = useState(false);
+  const [certL, setCertL] = useState(0);
+  const [certR, setCertR] = useState(0);
+  const certTotal = certL + certR;
+  const [certTeacher, setCertTeacher] = useState("Trần Ngọc Diễm");
+  const certRef = useRef(null);
 
-  const flash = (msg, type = "success") => { setToast({ msg, type }); setTimeout(() => setToast(null), 3000); };
-  const moLabel = (m) => { const [y, mo] = m.split("-"); return `T${parseInt(mo)}/${y}`; };
+  const flash = (msg, type="success") => { setToast({msg,type}); setTimeout(()=>setToast(null),3000); };
+  const moLabel = (m) => { const [y,mo]=m.split("-"); return `T${parseInt(mo)}/${y}`; };
 
   // Load students list
-  useEffect(() => { api.getStudents().then(d => setStudents(d.students || [])).catch(() => { }); }, []);
+  useEffect(() => { api.getStudents().then(d => setStudents(d.students||[])).catch(()=>{}); }, []);
 
   // Auto-fill on phone/code blur
   const autoFill = async () => {
@@ -156,40 +131,26 @@ export default function Home() {
     }
   };
 
-  // Autocomplete filter (client-side from loaded list)
   const filterByName = (val) => {
     setName(val);
     if (val.length >= 1) {
       const q = val.toLowerCase();
-      const matches = students.filter(s =>
-        s.name.toLowerCase().includes(q)
-      ).slice(0, 6);
-      setNameSuggestions(matches);
-      setShowNameDrop(matches.length > 0);
-    } else {
-      setShowNameDrop(false);
-    }
+      const m = students.filter(s => s.name.toLowerCase().includes(q)).slice(0,6);
+      setNameSugg(m); setShowNameDrop(m.length > 0);
+    } else setShowNameDrop(false);
   };
 
   const filterByPhone = (val) => {
     setPhone(val);
     if (val.length >= 3) {
-      const matches = students.filter(s =>
-        s.phone && s.phone.includes(val)
-      ).slice(0, 6);
-      setPhoneSuggestions(matches);
-      setShowPhoneDrop(matches.length > 0);
-    } else {
-      setShowPhoneDrop(false);
-    }
+      const m = students.filter(s => s.phone && s.phone.includes(val)).slice(0,6);
+      setPhoneSugg(m); setShowPhoneDrop(m.length > 0);
+    } else setShowPhoneDrop(false);
   };
 
-  const selectSuggestion = (s) => {
-    setName(s.name);
-    setPhone(s.phone || "");
-    setCode(s.code || "");
-    setShowNameDrop(false);
-    setShowPhoneDrop(false);
+  const pickSugg = (s) => {
+    setName(s.name); setPhone(s.phone||''); setCode(s.code||'');
+    setShowNameDrop(false); setShowPhoneDrop(false);
     flash(`Đã chọn: ${s.name}`);
   };
 
@@ -198,34 +159,47 @@ export default function Home() {
     const sc = {};
     const pats = [/P(\d)\s*[:\-=–—]\s*(\d+)\s*[\/\\]\s*(\d+)/gi, /Part\s*(\d)\s*[:\-=–—]\s*(\d+)\s*[\/\\]\s*(\d+)/gi];
     for (const pat of pats) { let m; while ((m = pat.exec(textInput)) !== null) { const p = `P${m[1]}`; const v = parseInt(m[2]); if (PM[p] && v <= PM[p]) sc[p] = v; } }
-    if (Object.keys(sc).length > 0) { setScores(prev => { const n = { ...prev }; Object.entries(sc).forEach(([k, v]) => n[k] = String(v)); return n; }); flash(`Nhận diện ${Object.keys(sc).length} Part`); }
-    else flash("Không tìm thấy điểm", "error");
+    if (Object.keys(sc).length > 0) { setScores(prev => { const n={...prev}; Object.entries(sc).forEach(([k,v])=>n[k]=String(v)); return n; }); flash(`Nhận diện ${Object.keys(sc).length} Part`); }
+    else flash("Không tìm thấy điểm","error");
   };
 
   // Live preview
-  const liveScore = (() => { const n = {}; Object.entries(scores).forEach(([k, v]) => n[k] = parseInt(v) || 0); return calc(n); })();
+  const liveScore = (() => { const n = {}; Object.entries(scores).forEach(([k,v])=>n[k]=parseInt(v)||0); return calc(n); })();
 
   // Submit
   const handleSubmit = async () => {
-    if (!name.trim()) { flash("Nhập tên học viên", "error"); return; }
+    if (!name.trim()) { flash("Nhập tên học viên","error"); return; }
     setLoading(true);
 
     try {
       // 1. Save/find student
       const stuRes = await api.saveStudent({ name: name.trim(), phone, code: code || undefined });
+
+      // ── Kiểm tra lỗi API ──
+      if (stuRes.error) {
+        flash(`Lỗi: ${stuRes.error}`, "error");
+        setLoading(false);
+        return;
+      }
+      if (!stuRes.student) {
+        flash("Lỗi: Không nhận được dữ liệu từ server. Kiểm tra kết nối Google Sheets tại /api/health", "error");
+        setLoading(false);
+        return;
+      }
+
       const stu = stuRes.student;
       setCode(stu.code);
 
       // 2. Save score
-      const num = {}; Object.entries(scores).forEach(([k, v]) => num[k] = parseInt(v) || 0);
+      const num = {}; Object.entries(scores).forEach(([k,v])=>num[k]=parseInt(v)||0);
       const scoreRes = await api.saveScore({ code: stu.code, month, ...num });
 
-      if (scoreRes.error) { flash(scoreRes.error, "error"); setLoading(false); return; }
+      if (scoreRes.error) { flash(scoreRes.error,"error"); setLoading(false); return; }
 
       // 3. Build report
       const history = scoreRes.history || [];
       const current = scoreRes.score;
-      const prevRecord = history.filter(h => h.month < month).sort((a, b) => b.month.localeCompare(a.month))[0];
+      const prevRecord = history.filter(h=>h.month<month).sort((a,b)=>b.month.localeCompare(a.month))[0];
       const est = calc(num);
       const lvl = findLvl(est.total);
       const nxt = nextTgt(est.total);
@@ -234,7 +208,7 @@ export default function Home() {
       const rpt = {
         code: stu.code, name: stu.name, phone: stu.phone, month,
         scores: num, est, lvl, nxt, tgt,
-        prevSc: prevRecord ? { P1: prevRecord.P1, P2: prevRecord.P2, P3: prevRecord.P3, P4: prevRecord.P4, P5: prevRecord.P5, P6: prevRecord.P6, P7: prevRecord.P7 } : null,
+        prevSc: prevRecord ? {P1:prevRecord.P1,P2:prevRecord.P2,P3:prevRecord.P3,P4:prevRecord.P4,P5:prevRecord.P5,P6:prevRecord.P6,P7:prevRecord.P7} : null,
         prevEst: prevRecord ? { listening: prevRecord.listening, reading: prevRecord.reading, total: prevRecord.total } : null,
         prevMo: prevRecord?.month,
         history,
@@ -244,18 +218,19 @@ export default function Home() {
       flash(`Lưu thành công! Mã: ${stu.code}`);
 
       // Refresh students
-      api.getStudents().then(d => setStudents(d.students || []));
+      api.getStudents().then(d=>setStudents(d.students||[]));
 
       // 4. AI analysis (background)
       setAiLoading(true); setAiInsight(null);
       try {
         const aiRes = await api.analyze({ name: stu.name, scores: num, prevScores: rpt.prevSc, estimate: est });
         if (aiRes.insight) setAiInsight(aiRes.insight);
-      } catch { }
+      } catch {}
       setAiLoading(false);
 
     } catch (err) {
-      flash(`Lỗi: ${err.message}`, "error");
+      console.error("Submit error:", err);
+      flash(`Lỗi kết nối: ${err.message}. Truy cập /api/health để kiểm tra`, "error");
     }
     setLoading(false);
   };
@@ -292,8 +267,8 @@ export default function Home() {
           Dữ liệu lưu trên Google Sheets · {students.length} học viên
         </div>
         <div style={{ display: "flex", justifyContent: "center", gap: 5, flexWrap: "wrap" }}>
-          {[{ k: "input", l: "📝 Nhập" }, { k: "report", l: "📊 Báo cáo" }, { k: "screenshot", l: "📸 Chụp ảnh" }, { k: "certificate", l: "🏆 Bằng khen" }, { k: "history", l: "📈 Lịch sử" }].map(t =>
-            <button key={t.k} onClick={() => setView(t.k)} className={`tag ${view === t.k ? "tag-active" : "tag-inactive"}`}>{t.l}</button>
+          {[{k:"input",l:"📝 Nhập"},{k:"report",l:"📊 Báo cáo"},{k:"capture",l:"📸 Chụp ảnh"},{k:"cert",l:"🏆 Bằng khen"},{k:"history",l:"📈 Lịch sử"}].map(t =>
+            <button key={t.k} onClick={()=>setView(t.k)} className={`tag ${view===t.k?"tag-active":"tag-inactive"}`}>{t.l}</button>
           )}
         </div>
       </div>
@@ -305,57 +280,41 @@ export default function Home() {
             <div style={{ fontSize: 11, color: "var(--text-dim)", letterSpacing: 1, marginBottom: 10, textTransform: "uppercase" }}>Thông tin học viên</div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
-              <div style={{ position: "relative" }}>
+              <div style={{position:"relative"}}>
                 <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 3 }}>HỌ TÊN *</label>
-                <input
-                  className="input"
-                  value={name}
-                  onChange={e => filterByName(e.target.value)}
-                  onFocus={() => name.length >= 1 && setShowNameDrop(nameSuggestions.length > 0)}
-                  onBlur={() => setTimeout(() => setShowNameDrop(false), 180)}
-                  placeholder="Gia Huy"
-                  autoComplete="off"
-                />
+                <input className="input" value={name} onChange={e=>filterByName(e.target.value)}
+                  onFocus={()=>name.length>=1&&setShowNameDrop(nameSugg.length>0)}
+                  onBlur={()=>setTimeout(()=>setShowNameDrop(false),180)}
+                  placeholder="Gia Huy" autoComplete="off" />
                 {showNameDrop && (
-                  <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#1e1e2e", border: "1px solid rgba(255,107,53,0.3)", borderRadius: 8, zIndex: 100, overflow: "hidden", boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                    {nameSuggestions.map(s => (
-                      <div
-                        key={s.code}
-                        onMouseDown={() => selectSuggestion(s)}
-                        style={{ padding: "8px 12px", cursor: "pointer", borderBottom: "1px solid rgba(255,255,255,0.04)", fontSize: 13 }}
-                        onMouseEnter={e => e.currentTarget.style.background = "rgba(255,107,53,0.15)"}
-                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                      >
-                        <div style={{ fontWeight: 600, color: "#fff" }}>{s.name}</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{s.phone || ""} · {s.code}</div>
+                  <div style={{position:"absolute",top:"100%",left:0,right:0,background:"#1e1e2e",border:"1px solid rgba(255,107,53,0.35)",borderRadius:8,zIndex:200,overflow:"hidden",boxShadow:"0 8px 24px rgba(0,0,0,0.5)"}}>
+                    {nameSugg.map(s=>(
+                      <div key={s.code} onMouseDown={()=>pickSugg(s)}
+                        style={{padding:"8px 12px",cursor:"pointer",borderBottom:"1px solid rgba(255,255,255,0.04)"}}
+                        onMouseEnter={e=>e.currentTarget.style.background="rgba(255,107,53,0.15)"}
+                        onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                        <div style={{fontWeight:600,color:"#fff",fontSize:13}}>{s.name}</div>
+                        <div style={{fontSize:11,color:"var(--text-dim)"}}>{s.phone||""} · {s.code}</div>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
-              <div style={{ position: "relative" }}>
+              <div style={{position:"relative"}}>
                 <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 3 }}>SỐ ĐIỆN THOẠI</label>
-                <input
-                  className="input"
-                  value={phone}
-                  onChange={e => filterByPhone(e.target.value)}
-                  onFocus={() => phone.length >= 3 && setShowPhoneDrop(phoneSuggestions.length > 0)}
-                  onBlur={() => setTimeout(() => setShowPhoneDrop(false), 180)}
-                  placeholder="0901234567"
-                  autoComplete="off"
-                />
+                <input className="input" value={phone} onChange={e=>filterByPhone(e.target.value)}
+                  onFocus={()=>phone.length>=3&&setShowPhoneDrop(phoneSugg.length>0)}
+                  onBlur={()=>setTimeout(()=>setShowPhoneDrop(false),180)}
+                  placeholder="0901234567" autoComplete="off" />
                 {showPhoneDrop && (
-                  <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#1e1e2e", border: "1px solid rgba(0,201,167,0.3)", borderRadius: 8, zIndex: 100, overflow: "hidden", boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}>
-                    {phoneSuggestions.map(s => (
-                      <div
-                        key={s.code}
-                        onMouseDown={() => selectSuggestion(s)}
-                        style={{ padding: "8px 12px", cursor: "pointer", borderBottom: "1px solid rgba(255,255,255,0.04)", fontSize: 13 }}
-                        onMouseEnter={e => e.currentTarget.style.background = "rgba(0,201,167,0.15)"}
-                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                      >
-                        <div style={{ fontWeight: 600, color: "#fff" }}>{s.phone}</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{s.name} · {s.code}</div>
+                  <div style={{position:"absolute",top:"100%",left:0,right:0,background:"#1e1e2e",border:"1px solid rgba(0,201,167,0.35)",borderRadius:8,zIndex:200,overflow:"hidden",boxShadow:"0 8px 24px rgba(0,0,0,0.5)"}}>
+                    {phoneSugg.map(s=>(
+                      <div key={s.code} onMouseDown={()=>pickSugg(s)}
+                        style={{padding:"8px 12px",cursor:"pointer",borderBottom:"1px solid rgba(255,255,255,0.04)"}}
+                        onMouseEnter={e=>e.currentTarget.style.background="rgba(0,201,167,0.15)"}
+                        onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                        <div style={{fontWeight:600,color:"#fff",fontSize:13}}>{s.phone}</div>
+                        <div style={{fontSize:11,color:"var(--text-dim)"}}>{s.name} · {s.code}</div>
                       </div>
                     ))}
                   </div>
@@ -365,12 +324,12 @@ export default function Home() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14 }}>
               <div>
                 <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 3 }}>MÃ HV</label>
-                <input className="input input-mono" value={code} onChange={e => setCode(e.target.value)} placeholder="ORI-XXXXX" onBlur={autoFill} style={{ letterSpacing: 1 }} />
+                <input className="input input-mono" value={code} onChange={e=>setCode(e.target.value)} placeholder="ORI-XXXXX" onBlur={autoFill} style={{letterSpacing:1}} />
                 <div style={{ fontSize: 10, color: "var(--text-dim)", marginTop: 2 }}>Bỏ trống → tự sinh</div>
               </div>
               <div>
                 <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 3 }}>THÁNG</label>
-                <input type="month" className="input" value={month} onChange={e => setMonth(e.target.value)} style={{ colorScheme: "dark" }} />
+                <input type="month" className="input" value={month} onChange={e=>setMonth(e.target.value)} style={{colorScheme:"dark"}} />
               </div>
             </div>
 
@@ -378,8 +337,8 @@ export default function Home() {
 
             {/* Input mode */}
             <div style={{ display: "flex", gap: 3, marginBottom: 12, background: "rgba(255,255,255,0.02)", borderRadius: 10, padding: 3 }}>
-              {[{ k: "manual", l: "Nhập tay" }, { k: "text", l: "Dán text" }].map(m =>
-                <button key={m.k} onClick={() => setInputMode(m.k)} style={{ flex: 1, padding: "7px 0", border: "none", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", background: inputMode === m.k ? "rgba(255,107,53,0.15)" : "transparent", color: inputMode === m.k ? "#FF6B35" : "rgba(255,255,255,0.3)" }}>{m.l}</button>
+              {[{k:"manual",l:"Nhập tay"},{k:"text",l:"Dán text"}].map(m =>
+                <button key={m.k} onClick={()=>setInputMode(m.k)} style={{ flex:1, padding:"7px 0", border:"none", borderRadius:8, fontSize:12, fontWeight:600, cursor:"pointer", background: inputMode===m.k?"rgba(255,107,53,0.15)":"transparent", color: inputMode===m.k?"#FF6B35":"rgba(255,255,255,0.3)" }}>{m.l}</button>
               )}
             </div>
 
@@ -390,7 +349,7 @@ export default function Home() {
                   {LP.map(p => (
                     <div key={p} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: "#FF6B35", width: 24 }}>{p}</span>
-                      <input type="number" min={0} max={PM[p]} className="input input-mono" value={scores[p]} onChange={e => setScores(s => ({ ...s, [p]: e.target.value }))} placeholder="0" style={{ width: 56, textAlign: "center", padding: "8px" }} />
+                      <input type="number" min={0} max={PM[p]} className="input input-mono" value={scores[p]} onChange={e=>setScores(s=>({...s,[p]:e.target.value}))} placeholder="0" style={{width:56,textAlign:"center",padding:"8px"}} />
                       <span style={{ fontSize: 11, color: "var(--text-dim)" }}>/{PM[p]}</span>
                     </div>
                   ))}
@@ -400,7 +359,7 @@ export default function Home() {
                   {RP.map(p => (
                     <div key={p} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                       <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: "#00C9A7", width: 24 }}>{p}</span>
-                      <input type="number" min={0} max={PM[p]} className="input input-mono" value={scores[p]} onChange={e => setScores(s => ({ ...s, [p]: e.target.value }))} placeholder="0" style={{ width: 56, textAlign: "center", padding: "8px" }} />
+                      <input type="number" min={0} max={PM[p]} className="input input-mono" value={scores[p]} onChange={e=>setScores(s=>({...s,[p]:e.target.value}))} placeholder="0" style={{width:56,textAlign:"center",padding:"8px"}} />
                       <span style={{ fontSize: 11, color: "var(--text-dim)" }}>/{PM[p]}</span>
                     </div>
                   ))}
@@ -409,13 +368,13 @@ export default function Home() {
             )}
             {inputMode === "text" && (
               <>
-                <textarea className="input input-mono" value={textInput} onChange={e => setTextInput(e.target.value)} placeholder={"Dán điểm:\nP1: 3/6\nP2: 12/25..."} style={{ height: 120, resize: "none", fontSize: 13 }} />
-                <button className="btn-primary" onClick={parseText} style={{ marginTop: 8, width: "100%" }}>🔍 Nhận diện</button>
+                <textarea className="input input-mono" value={textInput} onChange={e=>setTextInput(e.target.value)} placeholder={"Dán điểm:\nP1: 3/6\nP2: 12/25..."} style={{height:120,resize:"none",fontSize:13}} />
+                <button className="btn-primary" onClick={parseText} style={{marginTop:8,width:"100%"}}>🔍 Nhận diện</button>
               </>
             )}
 
             {/* Live preview */}
-            {Object.values(scores).some(v => v !== "") && (
+            {Object.values(scores).some(v=>v!=="") && (
               <div style={{ marginTop: 12, padding: 12, background: "rgba(255,255,255,0.03)", borderRadius: 10, border: "1px solid var(--border)" }}>
                 <div style={{ fontSize: 10, color: "var(--text-dim)", letterSpacing: 1, marginBottom: 6, textTransform: "uppercase" }}>⚡ Quy đổi trực tiếp</div>
                 <div style={{ display: "flex", justifyContent: "center", gap: 14, alignItems: "center" }}>
@@ -438,8 +397,8 @@ export default function Home() {
             )}
 
             <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
-              <button className="btn-secondary" onClick={() => { setName(""); setPhone(""); setCode(""); setScores({ P1: "", P2: "", P3: "", P4: "", P5: "", P6: "", P7: "" }) }} style={{ padding: "10px 14px" }} title="Xóa form để nhập học viên mới">🗑️ Mới</button>
-              <button className="btn-primary" onClick={handleSubmit} disabled={loading || !name.trim()} style={{ flex: 1 }}>
+              <button className="btn-secondary" onClick={()=>{setScores({P1:"",P2:"",P3:"",P4:"",P5:"",P6:"",P7:""})}} style={{padding:"10px 14px"}}>🗑️</button>
+              <button className="btn-primary" onClick={handleSubmit} disabled={loading||!name.trim()} style={{flex:1}}>
                 {loading ? "⏳ Đang lưu vào Google Sheets..." : "🚀 Tạo báo cáo & Lưu"}
               </button>
             </div>
@@ -474,7 +433,7 @@ export default function Home() {
             </div>
 
             <div style={{ marginTop: 10, padding: 8, background: "rgba(255,255,255,0.02)", borderRadius: 8, fontSize: 12, color: "var(--text-muted)" }}>
-              🎧 {report.est.lCorrect} đúng → <strong style={{ color: "#FF6B35" }}>{report.est.listening}</strong> · 📖 {report.est.rCorrect} đúng → <strong style={{ color: "#00C9A7" }}>{report.est.reading}</strong>
+              🎧 {report.est.lCorrect} đúng → <strong style={{color:"#FF6B35"}}>{report.est.listening}</strong> · 📖 {report.est.rCorrect} đúng → <strong style={{color:"#00C9A7"}}>{report.est.reading}</strong>
             </div>
           </div>
 
@@ -482,20 +441,20 @@ export default function Home() {
           <div className="card">
             <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", marginBottom: 10, letterSpacing: 1 }}>📊 CHI TIẾT</div>
             <div style={{ fontSize: 11, color: "#FF6B35", fontWeight: 700, marginBottom: 5 }}>🎧 LISTENING</div>
-            {LP.map(p => <PartBar key={p} part={p} current={report.scores[p]} max={PM[p]} target={report.tgt?.[p]?.target} prev={report.prevSc?.[p]} />)}
+            {LP.map(p=><PartBar key={p} part={p} current={report.scores[p]} max={PM[p]} target={report.tgt?.[p]?.target} prev={report.prevSc?.[p]} />)}
             <div style={{ height: 1, background: "var(--border)", margin: "8px 0" }} />
             <div style={{ fontSize: 11, color: "#00C9A7", fontWeight: 700, marginBottom: 5 }}>📖 READING</div>
-            {RP.map(p => <PartBar key={p} part={p} current={report.scores[p]} max={PM[p]} target={report.tgt?.[p]?.target} prev={report.prevSc?.[p]} />)}
+            {RP.map(p=><PartBar key={p} part={p} current={report.scores[p]} max={PM[p]} target={report.tgt?.[p]?.target} prev={report.prevSc?.[p]} />)}
           </div>
 
           {/* Targets */}
           <div className="card" style={{ borderColor: "rgba(255,215,64,0.1)" }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: "#FFD740", marginBottom: 10 }}>🎯 MỤC TIÊU → {report.nxt}+</div>
-            {report.tgt && Object.entries(report.tgt).map(([p, t]) => (
+            {report.tgt && Object.entries(report.tgt).map(([p,t])=>(
               <div key={p} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
-                <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: LP.includes(p) ? "#FF6B35" : "#00C9A7" }}>{p}</span>
+                <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: LP.includes(p)?"#FF6B35":"#00C9A7" }}>{p}</span>
                 <span style={{ fontSize: 12 }}>{t.current} → {t.target}/{PM[p]}</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: t.exceeded ? "#00E676" : "#FFD740", background: t.exceeded ? "rgba(0,230,118,0.08)" : "rgba(255,215,64,0.08)", padding: "2px 7px", borderRadius: 5 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: t.exceeded?"#00E676":"#FFD740", background: t.exceeded?"rgba(0,230,118,0.08)":"rgba(255,215,64,0.08)", padding: "2px 7px", borderRadius: 5 }}>
                   {t.exceeded ? "✅ Đạt" : `+${t.diff}`}
                 </span>
               </div>
@@ -512,11 +471,11 @@ export default function Home() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
                   <div style={{ padding: 8, background: "rgba(0,230,118,0.05)", borderRadius: 8 }}>
                     <div style={{ fontSize: 10, color: "#00E676", fontWeight: 700, marginBottom: 3 }}>💪 MẠNH</div>
-                    {aiInsight.strengths?.map((s, i) => <div key={i} style={{ fontSize: 12, marginBottom: 2 }}>• {s}</div>)}
+                    {aiInsight.strengths?.map((s,i)=><div key={i} style={{fontSize:12,marginBottom:2}}>• {s}</div>)}
                   </div>
                   <div style={{ padding: 8, background: "rgba(255,82,82,0.05)", borderRadius: 8 }}>
                     <div style={{ fontSize: 10, color: "#FF5252", fontWeight: 700, marginBottom: 3 }}>⚠️ CẢI THIỆN</div>
-                    {aiInsight.weaknesses?.map((w, i) => <div key={i} style={{ fontSize: 12, marginBottom: 2 }}>• {w}</div>)}
+                    {aiInsight.weaknesses?.map((w,i)=><div key={i} style={{fontSize:12,marginBottom:2}}>• {w}</div>)}
                   </div>
                 </div>
                 <div style={{ padding: 8, background: "rgba(255,215,64,0.04)", borderRadius: 8, marginBottom: 6 }}>
@@ -528,795 +487,383 @@ export default function Home() {
             )}
             {!aiLoading && !aiInsight && <div style={{ textAlign: "center", padding: 10, color: "var(--text-dim)", fontSize: 12 }}>AI chưa cấu hình hoặc không khả dụng. Thêm ANTHROPIC_API_KEY trong .env.local để bật.</div>}
           </div>
-        </div>
-      )}
 
-      {/* ═══ SCREENSHOT REPORT ═══ */}
-      {view === "screenshot" && report && (() => {
-        const extra50 = calcExtraNeeded(report.est.lCorrect, report.est.rCorrect, 50);
-        const extra100 = calcExtraNeeded(report.est.lCorrect, report.est.rCorrect, 100);
-        return (
-          <div style={{ padding: 0 }}>
-            {/* Screenshot-friendly card */}
-            <div style={{
-              background: "linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
-              borderRadius: 20,
-              padding: "24px 20px",
-              border: "2px solid rgba(255,215,64,0.3)",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.5)"
-            }}>
-              {/* Header with branding */}
-              <div style={{ textAlign: "center", marginBottom: 20 }}>
-                <div style={{
-                  fontSize: 11,
-                  letterSpacing: 4,
-                  color: "#FFD740",
-                  textTransform: "uppercase",
-                  fontWeight: 700,
-                  marginBottom: 4
-                }}>ORI EDUCATION</div>
-                <div style={{
-                  fontSize: 9,
-                  color: "rgba(255,255,255,0.4)",
-                  letterSpacing: 2
-                }}>BÁO CÁO ĐIỂM TOEIC · {moLabel(report.month)}</div>
-              </div>
+          {/* ═══ ZALO SHARE ═══ */}
+          <div className="card" style={{ borderColor: "rgba(0,168,255,0.15)", background: "rgba(0,168,255,0.03)" }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#00A8FF", marginBottom: 10 }}>💬 GỬI QUA ZALO</div>
 
-              {/* Student name */}
-              <div style={{ textAlign: "center", marginBottom: 16 }}>
-                <h2 style={{
-                  fontSize: 28,
-                  fontWeight: 900,
-                  margin: 0,
-                  color: "#fff",
-                  textShadow: "0 2px 10px rgba(255,107,53,0.3)"
-                }}>{report.name}</h2>
-                <div style={{
-                  fontSize: 11,
-                  color: "rgba(255,255,255,0.4)",
-                  marginTop: 4
-                }}>Mã HV: {report.code}</div>
-              </div>
+            <button onClick={() => {
+              const m = report, e = m.est;
+              const diffText = m.prevEst ? ` (${e.total >= m.prevEst.total ? "+" : ""}${e.total - m.prevEst.total} so với ${moLabel(m.prevMo)})` : "";
+              const parts = [...LP,...RP].map(p => `  ${p}: ${m.scores[p]}/${PM[p]}`).join("\n");
+              const url = `${window.location.origin}/report/${m.code}`;
+              const msg = `📊 BÁO CÁO ĐIỂM TOEIC — ${moLabel(m.month)}\n━━━━━━━━━━━━━━━━━━━━\n\n👤 Học viên: ${m.name}\n🆔 Mã HV: ${m.code}\n\n📝 TỔNG ĐIỂM: ${e.total}/990${diffText}\n🎧 Listening: ${e.listening}/495 (${e.lCorrect} câu đúng)\n📖 Reading: ${e.reading}/495 (${e.rCorrect} câu đúng)\n\n📋 Chi tiết:\n${parts}\n\n🎯 Mục tiêu tháng sau: ${m.nxt}+\n\n🔗 Xem báo cáo đầy đủ:\n${url}\n\n━━━━━━━━━━━━━━━━━━━━\nORI TOEIC · 0906 303 373`;
+              navigator.clipboard.writeText(msg).then(() => flash("✅ Đã copy! Mở Zalo → paste gửi")).catch(() => flash("Không copy được", "error"));
+            }} style={{ width:"100%",padding:"12px 16px",border:"none",borderRadius:10,background:"linear-gradient(135deg,#0068FF,#00A8FF)",color:"white",fontSize:14,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:8 }}>
+              📋 Copy tin nhắn Zalo (đầy đủ)
+            </button>
 
-              {/* Main score circle */}
-              <div style={{
-                textAlign: "center",
-                margin: "20px 0",
-                position: "relative"
-              }}>
-                <div style={{
-                  width: 140,
-                  height: 140,
-                  margin: "0 auto",
-                  borderRadius: "50%",
-                  background: "linear-gradient(135deg, rgba(255,107,53,0.2), rgba(0,201,167,0.2))",
-                  border: "4px solid",
-                  borderColor: "#FFD740",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 0 40px rgba(255,215,64,0.3)"
-                }}>
-                  <div className="mono" style={{
-                    fontSize: 48,
-                    fontWeight: 900,
-                    background: "linear-gradient(135deg, #FF6B35, #FFD740)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent"
-                  }}>{report.est.total}</div>
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>/ 990</div>
-                </div>
+            <button onClick={() => {
+              const m = report, e = m.est, url = `${window.location.origin}/report/${m.code}`;
+              const msg = `Chào PH ${m.name},\n\nBáo cáo TOEIC ${moLabel(m.month)}: ${e.total}/990 (L: ${e.listening} + R: ${e.reading}).\n\n👉 Xem chi tiết: ${url}\n\nORI TOEIC · 0906 303 373`;
+              navigator.clipboard.writeText(msg).then(() => flash("✅ Đã copy tin nhắn ngắn!")).catch(() => flash("Không copy được", "error"));
+            }} style={{ width:"100%",padding:"10px 16px",border:"1px solid rgba(0,168,255,0.2)",borderRadius:10,background:"transparent",color:"#00A8FF",fontSize:13,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:8 }}>
+              ✉️ Copy tin nhắn ngắn + link
+            </button>
 
-                {/* Change indicator */}
-                {report.prevEst && (
-                  <div style={{
-                    position: "absolute",
-                    right: "calc(50% - 90px)",
-                    top: 10,
-                    padding: "4px 10px",
-                    borderRadius: 12,
-                    fontSize: 13,
-                    fontWeight: 800,
-                    background: report.est.total >= report.prevEst.total
-                      ? "linear-gradient(135deg, #00E676, #00C853)"
-                      : "linear-gradient(135deg, #FF5252, #D32F2F)",
-                    color: "#fff",
-                    boxShadow: "0 4px 15px rgba(0,0,0,0.3)"
-                  }}>
-                    {report.est.total >= report.prevEst.total ? "↑" : "↓"} {Math.abs(report.est.total - report.prevEst.total)}
-                  </div>
-                )}
-              </div>
-
-              {/* L/R breakdown */}
-              <div style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 12,
-                marginBottom: 20
-              }}>
-                <div style={{
-                  background: "rgba(255,107,53,0.15)",
-                  borderRadius: 12,
-                  padding: 12,
-                  textAlign: "center",
-                  border: "1px solid rgba(255,107,53,0.3)"
-                }}>
-                  <div style={{ fontSize: 10, color: "#FF6B35", fontWeight: 700, marginBottom: 4 }}>🎧 LISTENING</div>
-                  <div className="mono" style={{ fontSize: 28, fontWeight: 900, color: "#FF6B35" }}>{report.est.listening}</div>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>{report.est.lCorrect}/100 đúng</div>
-                </div>
-                <div style={{
-                  background: "rgba(0,201,167,0.15)",
-                  borderRadius: 12,
-                  padding: 12,
-                  textAlign: "center",
-                  border: "1px solid rgba(0,201,167,0.3)"
-                }}>
-                  <div style={{ fontSize: 10, color: "#00C9A7", fontWeight: 700, marginBottom: 4 }}>📖 READING</div>
-                  <div className="mono" style={{ fontSize: 28, fontWeight: 900, color: "#00C9A7" }}>{report.est.reading}</div>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>{report.est.rCorrect}/100 đúng</div>
-                </div>
-              </div>
-
-              {/* Part breakdown */}
-              <div style={{
-                background: "rgba(255,255,255,0.03)",
-                borderRadius: 12,
-                padding: 12,
-                marginBottom: 16
-              }}>
-                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginBottom: 8, letterSpacing: 1 }}>CHI TIẾT TỪNG PART</div>
-                <div style={{ display: "flex", gap: 4, justifyContent: "center", flexWrap: "wrap" }}>
-                  {AP.map(p => (
-                    <div key={p} style={{
-                      padding: "6px 10px",
-                      borderRadius: 8,
-                      background: LP.includes(p) ? "rgba(255,107,53,0.1)" : "rgba(0,201,167,0.1)",
-                      border: `1px solid ${LP.includes(p) ? "rgba(255,107,53,0.3)" : "rgba(0,201,167,0.3)"}`,
-                      textAlign: "center",
-                      minWidth: 50
-                    }}>
-                      <div className="mono" style={{ fontSize: 10, color: LP.includes(p) ? "#FF6B35" : "#00C9A7", fontWeight: 700 }}>{p}</div>
-                      <div style={{ fontSize: 13, fontWeight: 800, color: "#fff" }}>{report.scores[p]}/{PM[p]}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Target goals +50 and +100 */}
-              <div style={{
-                background: "linear-gradient(135deg, rgba(255,215,64,0.1), rgba(255,107,53,0.1))",
-                borderRadius: 16,
-                padding: 16,
-                border: "2px solid rgba(255,215,64,0.3)"
-              }}>
-                <div style={{
-                  fontSize: 12,
-                  fontWeight: 800,
-                  color: "#FFD740",
-                  marginBottom: 12,
-                  textAlign: "center",
-                  letterSpacing: 1
-                }}>🎯 MỤC TIÊU THÁNG SAU</div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  {/* +50 target */}
-                  <div style={{
-                    background: "rgba(0,0,0,0.3)",
-                    borderRadius: 12,
-                    padding: 12,
-                    textAlign: "center"
-                  }}>
-                    <div style={{ fontSize: 10, color: "#00E676", fontWeight: 700, marginBottom: 4 }}>TĂNG +50 ĐIỂM</div>
-                    <div className="mono" style={{ fontSize: 22, fontWeight: 900, color: "#00E676" }}>{report.est.total + 50}</div>
-                    <div style={{ height: 1, background: "rgba(255,255,255,0.1)", margin: "8px 0" }}></div>
-                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)" }}>
-                      Cần thêm: <span style={{ fontWeight: 800, color: "#FFD740" }}>{extra50.extraTotal} câu</span>
-                    </div>
-                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>
-                      (L +{extra50.extraL} / R +{extra50.extraR})
-                    </div>
-                  </div>
-
-                  {/* +100 target */}
-                  <div style={{
-                    background: "rgba(0,0,0,0.3)",
-                    borderRadius: 12,
-                    padding: 12,
-                    textAlign: "center"
-                  }}>
-                    <div style={{ fontSize: 10, color: "#FF6B35", fontWeight: 700, marginBottom: 4 }}>TĂNG +100 ĐIỂM</div>
-                    <div className="mono" style={{ fontSize: 22, fontWeight: 900, color: "#FF6B35" }}>{Math.min(990, report.est.total + 100)}</div>
-                    <div style={{ height: 1, background: "rgba(255,255,255,0.1)", margin: "8px 0" }}></div>
-                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.7)" }}>
-                      Cần thêm: <span style={{ fontWeight: 800, color: "#FFD740" }}>{extra100.extraTotal} câu</span>
-                    </div>
-                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>
-                      (L +{extra100.extraL} / R +{extra100.extraR})
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div style={{
-                textAlign: "center",
-                marginTop: 16,
-                paddingTop: 12,
-                borderTop: "1px solid rgba(255,255,255,0.1)"
-              }}>
-                <div style={{ fontSize: 10, color: "#FFD740", fontWeight: 700, marginBottom: 2 }}>ORI EDUCATION</div>
-                <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)" }}>📞 0906 303 373 · Zalo hỗ trợ 24/7</div>
-              </div>
-            </div>
-
-            <div style={{ textAlign: "center", marginTop: 12, fontSize: 11, color: "var(--text-dim)" }}>
-              📸 Chụp ảnh màn hình phía trên để gửi cho học viên!
-            </div>
+            <button onClick={() => {
+              const url = `${window.location.origin}/report/${report.code}`;
+              navigator.clipboard.writeText(url).then(() => flash("✅ Đã copy link!")).catch(() => flash("Không copy được", "error"));
+            }} style={{ width:"100%",padding:"10px 16px",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10,background:"transparent",color:"rgba(255,255,255,0.4)",fontSize:12,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6 }}>
+              🔗 Copy link: /report/{report.code}
+            </button>
           </div>
-        );
-      })()}
-
-      {view === "screenshot" && !report && (
-        <div className="card" style={{ textAlign: "center", padding: 30 }}>
-          <div style={{ fontSize: 40, marginBottom: 10 }}>📸</div>
-          <div style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 10 }}>Chưa có báo cáo</div>
-          <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Vui lòng nhập điểm và tạo báo cáo trước</div>
-          <button className="btn-primary" onClick={() => setView("input")} style={{ marginTop: 16 }}>
-            📝 Đi đến Nhập điểm
-          </button>
         </div>
       )}
 
-      {/* ═══ CERTIFICATE ═══ */}
-      {view === "certificate" && (() => {
-        const loadCertStudent = async (code) => {
-          setCertStudent(code);
-          const student = students.find(s => s.code === code);
-          if (student) {
-            setCertName(student.name);
-            // Load latest score
-            const h = await api.getHistory(code);
-            if (h.scores?.length > 0) {
-              const latest = h.scores.sort((a, b) => b.month.localeCompare(a.month))[0];
-              setCertListening(latest.listening);
-              setCertReading(latest.reading);
-              setCertTotal(latest.total);
-            }
-          }
-        };
-
-        const exportImage = async () => {
-          if (!certRef.current) return;
-          setExporting(true);
-          try {
-            const html2canvas = (await import("html2canvas")).default;
-            const canvas = await html2canvas(certRef.current, {
-              scale: 2,
-              backgroundColor: "#ffffff",
-              useCORS: true,
-              logging: false
-            });
-            const link = document.createElement("a");
-            link.download = `bangkhen-${certName.replace(/\s+/g, "-")}-${Date.now()}.jpg`;
-            link.href = canvas.toDataURL("image/jpeg", 0.95);
-            link.click();
-            flash("✅ Đã tải xuống bằng khen!");
-          } catch (err) {
-            console.error(err);
-            flash("❌ Lỗi xuất ảnh", "error");
-          }
-          setExporting(false);
-        };
-
-        const today = new Date();
-        const dateStr = `TP. Hồ Chí Minh, ngày ${today.getDate()} tháng ${today.getMonth() + 1} năm ${today.getFullYear()}`;
-        const instructorSign = certInstructor === "Grace Phạm" ? "Grace" :
-          certInstructor === "Đỗ Ngọc Loan" ? "N. Loan" : "T. N. Diễm";
-
-        return (
-          <div>
-            {/* Controls */}
-            <div className="card" style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#FFD740", marginBottom: 12 }}>🏆 TẠO BẰNG KHEN</div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-                <div>
-                  <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>CHỌN HỌC VIÊN</label>
-                  <select
-                    className="input"
-                    value={certStudent}
-                    onChange={e => loadCertStudent(e.target.value)}
-                    style={{ width: "100%" }}
-                  >
-                    <option value="">-- Chọn hoặc nhập tay bên dưới --</option>
-                    {students.map(s => (
-                      <option key={s.code} value={s.code}>{s.name} ({s.code})</option>
-                    ))}
-                  </select>
+      {/* ═══ CHỤP ẢNH ═══ */}
+      {view === "capture" && (
+        <div className="card" style={{ textAlign: "center" }}>
+          {report ? (
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", marginBottom: 12 }}>📸 CHỤP ẢNH BÁO CÁO</div>
+              <div id="capture-area" style={{ background: "rgba(255,255,255,0.02)", borderRadius: 12, padding: 16, textAlign: "center" }}>
+                <div style={{ fontSize: 10, letterSpacing: 3, color: "var(--text-dim)", textTransform: "uppercase", marginBottom: 6 }}>ORI TOEIC · Báo cáo điểm</div>
+                <div style={{ fontSize: 20, fontWeight: 900, color: "#fff", marginBottom: 2 }}>{report.name}</div>
+                <div className="mono" style={{ fontSize: 10, color: "var(--text-dim)", marginBottom: 12 }}>{report.code} · {moLabel(report.month)}</div>
+                <div style={{ display: "flex", justifyContent: "center", gap: 20, marginBottom: 12 }}>
+                  <Ring value={report.est.lCorrect} max={100} size={90} color="#FF6B35" label="Listening" score={report.est.listening} />
+                  <div style={{ textAlign: "center", alignSelf: "center" }}>
+                    <div className="mono" style={{ fontSize: 36, fontWeight: 900, color: "#FFD740" }}>{report.est.total}</div>
+                    <div style={{ fontSize: 10, color: "var(--text-dim)" }}>/990</div>
+                  </div>
+                  <Ring value={report.est.rCorrect} max={100} size={90} color="#00C9A7" label="Reading" score={report.est.reading} />
                 </div>
-                <div>
-                  <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>GIÁO VIÊN</label>
-                  <select
-                    className="input"
-                    value={certInstructor}
-                    onChange={e => setCertInstructor(e.target.value)}
-                    style={{ width: "100%" }}
-                  >
-                    <option value="Trần Ngọc Diễm">Trần Ngọc Diễm</option>
-                    <option value="Grace Phạm">Grace Phạm</option>
-                    <option value="Đỗ Ngọc Loan">Đỗ Ngọc Loan</option>
-                  </select>
-                </div>
+                {AP.map(p => <PartBar key={p} part={p} current={report.scores[p]} max={PM[p]} target={report.tgt?.[p]?.target} prev={report.prevSc?.[p]} />)}
               </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
-                <div>
-                  <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>TÊN</label>
-                  <input className="input" value={certName} onChange={e => setCertName(e.target.value)} style={{ width: "100%" }} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>LISTENING</label>
-                  <input className="input" type="number" value={certListening} onChange={e => setCertListening(Number(e.target.value))} style={{ width: "100%" }} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>READING</label>
-                  <input className="input" type="number" value={certReading} onChange={e => setCertReading(Number(e.target.value))} style={{ width: "100%" }} />
-                </div>
-                <div>
-                  <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>TỔNG</label>
-                  <input className="input" type="number" value={certTotal} onChange={e => setCertTotal(Number(e.target.value))} style={{ width: "100%" }} />
-                </div>
-              </div>
-
-              <button
-                className="btn-primary"
-                onClick={exportImage}
-                disabled={exporting}
-                style={{ width: "100%" }}
-              >
-                {exporting ? "⏳ Đang xuất..." : "📥 TẢI XUỐNG BẰNG KHEN (JPG)"}
+              <button className="btn-primary" onClick={async () => {
+                try {
+                  if (typeof window.html2canvas === 'undefined') {
+                    const s = document.createElement('script');
+                    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                    document.head.appendChild(s);
+                    await new Promise(r => s.onload = r);
+                  }
+                  const el = document.getElementById('capture-area');
+                  const canvas = await window.html2canvas(el, { scale: 2, backgroundColor: '#0f0f1a' });
+                  const link = document.createElement('a');
+                  link.download = `toeic-${report.name.replace(/\s+/g, '-')}-${report.month}.png`;
+                  link.href = canvas.toDataURL('image/png');
+                  link.click();
+                  flash("✅ Đã tải ảnh!");
+                } catch (err) { flash("Lỗi: " + err.message, "error"); }
+              }} style={{ width: "100%", marginTop: 12, fontSize: 14, padding: "12px 0" }}>
+                📥 TẢI XUỐNG ẢNH (PNG)
               </button>
             </div>
-
-            {/* Certificate Preview - Expert Design */}
-            {(() => {
-              // Dynamic font size: tên ngắn → to, tên dài → nhỏ hơn
-              const nameLen = certName.length;
-              const nameFontSize = nameLen <= 6 ? 72 : nameLen <= 10 ? 60 : nameLen <= 15 ? 50 : nameLen <= 20 ? 42 : 34;
-
-              return (
-                <div ref={certRef} style={{
-                  width: "100%",
-                  aspectRatio: "210/297",
-                  background: "linear-gradient(180deg, #ffffff 0%, #fefefe 100%)",
-                  border: "14px solid #1e3a8a",
-                  position: "relative",
-                  boxSizing: "border-box",
-                  fontFamily: "Times New Roman, serif",
-                  color: "#1e3a8a",
-                  overflow: "hidden"
-                }}>
-                  {/* Inner gold border frame */}
-                  <div style={{
-                    position: "absolute",
-                    top: 12,
-                    left: 12,
-                    right: 12,
-                    bottom: 12,
-                    border: "3px double #d4af37",
-                    pointerEvents: "none"
-                  }} />
-
-                  {/* Content area with proper margin - safe distance from border */}
-                  <div style={{
-                    position: "absolute",
-                    top: 36,
-                    left: 36,
-                    right: 36,
-                    bottom: 36,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between"
-                  }}>
-                    {/* Corner decorations - inside content with offset */}
-                    <div style={{ position: "absolute", top: -8, left: -8, width: 40, height: 40, borderTop: "3px solid #d4af37", borderLeft: "3px solid #d4af37" }} />
-                    <div style={{ position: "absolute", top: -8, right: -8, width: 40, height: 40, borderTop: "3px solid #d4af37", borderRight: "3px solid #d4af37" }} />
-                    <div style={{ position: "absolute", bottom: -8, left: -8, width: 40, height: 40, borderBottom: "3px solid #d4af37", borderLeft: "3px solid #d4af37" }} />
-                    <div style={{ position: "absolute", bottom: -8, right: -8, width: 40, height: 40, borderBottom: "3px solid #d4af37", borderRight: "3px solid #d4af37" }} />
-
-                    {/* ═══ HEADER - với padding để tránh góc trang trí ═══ */}
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", paddingTop: 8, paddingLeft: 40, paddingRight: 40 }}>
-                      <div style={{
-                        padding: "7px 16px",
-                        background: "linear-gradient(135deg, #1e3a8a 0%, #172554 100%)",
-                        color: "#d4af37",
-                        fontFamily: "Montserrat, Arial, sans-serif",
-                        fontWeight: 700,
-                        fontSize: 14,
-                        letterSpacing: 2,
-                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
-                      }}>ORI ACADEMY</div>
-                      <div style={{ fontStyle: "italic", fontSize: 13, color: "#475569", paddingTop: 6 }}>{dateStr}</div>
-                    </div>
-
-                    {/* ═══ TITLE ═══ */}
-                    <div style={{ textAlign: "center", marginTop: 12 }}>
-                      <h1 style={{
-                        fontFamily: "Playfair Display, serif",
-                        fontSize: 56,
-                        fontWeight: 700,
-                        margin: 0,
-                        textTransform: "uppercase",
-                        letterSpacing: 8,
-                        background: "linear-gradient(135deg, #1e3a8a 0%, #c9a227 50%, #1e3a8a 100%)",
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        textShadow: "none"
-                      }}>Bằng Khen</h1>
-                      <div style={{
-                        fontFamily: "Montserrat, Arial, sans-serif",
-                        fontSize: 15,
-                        fontWeight: 600,
-                        color: "#d4af37",
-                        letterSpacing: 4,
-                        textTransform: "uppercase",
-                        marginTop: 6
-                      }}>TOEIC ACHIEVEMENT AWARD</div>
-                    </div>
-
-                    {/* ═══ RECIPIENT ═══ */}
-                    <div style={{ textAlign: "center" }}>
-                      <div style={{
-                        fontSize: 16,
-                        color: "#475569",
-                        marginBottom: 12,
-                        fontStyle: "italic",
-                        letterSpacing: 0.5
-                      }}>Hệ thống Anh ngữ ORI trân trọng trao tặng cho</div>
-
-                      {/* === STUDENT NAME - PROMINENT === */}
-                      <div style={{
-                        fontFamily: "Great Vibes, cursive",
-                        fontSize: nameFontSize,
-                        color: "#1e3a8a",
-                        lineHeight: 1.15,
-                        padding: "8px 0",
-                        textShadow: "1px 1px 2px rgba(30,58,138,0.1)"
-                      }}>{certName}</div>
-                    </div>
-
-                    {/* ═══ SCORE SECTION - Centered with equal spacing ═══ */}
-                    <div style={{
-                      flex: 1,
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      gap: 16
-                    }}>
-                      <div style={{
-                        fontSize: 15,
-                        lineHeight: 1.7,
-                        color: "#334155",
-                        letterSpacing: 0.3,
-                        textAlign: "center"
-                      }}>
-                        Đã hoàn thành xuất sắc kỳ thi thử TOEIC chuẩn quốc tế<br />
-                        với kết quả đạt được như sau:
-                      </div>
-
-                      {/* Score box - Centered and balanced */}
-                      <div style={{
-                        padding: "24px 56px",
-                        background: "linear-gradient(180deg, #fefefe 0%, #f8f9fa 100%)",
-                        border: "2px solid #d4af37",
-                        position: "relative",
-                        boxShadow: "0 4px 12px rgba(212,175,55,0.15)",
-                        textAlign: "center"
-                      }}>
-                        <div style={{ position: "absolute", top: 5, left: 5, right: 5, bottom: 5, border: "1px solid rgba(212,175,55,0.3)", pointerEvents: "none" }} />
-
-                        {/* Listening & Reading - Blue text */}
-                        <div style={{ display: "flex", gap: 56, justifyContent: "center", marginBottom: 16 }}>
-                          <div style={{ textAlign: "center" }}>
-                            <div style={{ fontWeight: 600, color: "#1e3a8a", fontSize: 14, marginBottom: 4 }}>Listening</div>
-                            <div style={{ fontWeight: 800, color: "#1e3a8a", fontSize: 26 }}>{certListening}</div>
-                          </div>
-                          <div style={{ textAlign: "center" }}>
-                            <div style={{ fontWeight: 600, color: "#1e3a8a", fontSize: 14, marginBottom: 4 }}>Reading</div>
-                            <div style={{ fontWeight: 800, color: "#1e3a8a", fontSize: 26 }}>{certReading}</div>
-                          </div>
-                        </div>
-
-                        {/* Total - Gold and bigger */}
-                        <div style={{ fontSize: 12, color: "#64748b", letterSpacing: 1.5, marginBottom: 8, textTransform: "uppercase", textAlign: "center" }}>Tổng điểm đạt được</div>
-                        <div style={{ fontSize: 52, fontWeight: 800, color: "#d4af37", lineHeight: 1, textShadow: "1px 1px 2px rgba(0,0,0,0.1)", textAlign: "center" }}>{certTotal}</div>
-                      </div>
-                    </div>
-
-                    {/* ═══ SIGNATURES - với padding để tránh góc trang trí ═══ */}
-                    <div style={{ display: "flex", justifyContent: "space-between", paddingLeft: 50, paddingRight: 50, paddingBottom: 8 }}>
-                      <div style={{ textAlign: "center", width: 150 }}>
-                        <div style={{ height: 42, borderBottom: "2px solid #d4af37", position: "relative", marginBottom: 8 }}>
-                          <div style={{
-                            position: "absolute",
-                            bottom: 8,
-                            left: "50%",
-                            transform: "translateX(-50%)",
-                            fontFamily: "Great Vibes, cursive",
-                            fontSize: 26,
-                            color: "#1e40af",
-                            whiteSpace: "nowrap"
-                          }}>{instructorSign}</div>
-                        </div>
-                        <div style={{ fontFamily: "Montserrat, Arial, sans-serif", fontWeight: 700, color: "#1e3a8a", textTransform: "uppercase", fontSize: 10, letterSpacing: 1 }}>Giáo viên hướng dẫn</div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: "#333", marginTop: 4 }}>{certInstructor}</div>
-                      </div>
-
-                      <div style={{ textAlign: "center", width: 150 }}>
-                        <div style={{ height: 42, borderBottom: "2px solid #d4af37", position: "relative", marginBottom: 8 }}>
-                          <div style={{
-                            position: "absolute",
-                            bottom: 8,
-                            left: "50%",
-                            transform: "translateX(-50%)",
-                            fontFamily: "Great Vibes, cursive",
-                            fontSize: 26,
-                            color: "#1e40af",
-                            whiteSpace: "nowrap"
-                          }}>T. N. Diễm</div>
-                        </div>
-                        <div style={{ fontFamily: "Montserrat, Arial, sans-serif", fontWeight: 700, color: "#1e3a8a", textTransform: "uppercase", fontSize: 10, letterSpacing: 1 }}>Giám đốc trung tâm</div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: "#333", marginTop: 4 }}>Trần Ngọc Diễm</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            <div style={{ textAlign: "center", marginTop: 12, fontSize: 11, color: "var(--text-dim)" }}>
-              📸 Xem trước bằng khen · Nhấn nút tải xuống để lưu ảnh JPG
-            </div>
-          </div>
-        );
-      })()}
-
-
-      {view === "history" && (
-        <div>
-          <div className="card">
-            <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", marginBottom: 10 }}>📈 LỊCH SỬ ĐIỂM</div>
-            {students.length === 0 ? <div style={{ textAlign: "center", padding: 24, color: "var(--text-dim)" }}>📭 Chưa có học viên</div> : (
-              <>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 12 }}>
-                  {students.map(s => (
-                    <button key={s.code} onClick={() => loadHistory(s.code)} className={`tag ${selStudent === s.code ? "tag-active" : "tag-inactive"}`}>
-                      {s.name} <span style={{ opacity: 0.4, fontSize: 10 }}>{s.code}</span>
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Progress Chart - Screenshot Optimized */}
-          {selStudent && selHistory.length > 0 && (() => {
-            const sorted = [...selHistory].sort((a, b) => a.month.localeCompare(b.month));
-            const studentInfo = students.find(s => s.code === selStudent);
-            const maxScore = 990;
-            const firstScore = sorted[0]?.total || 0;
-            const lastScore = sorted[sorted.length - 1]?.total || 0;
-            const totalProgress = lastScore - firstScore;
-
-            return (
-              <div style={{
-                background: "linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
-                borderRadius: 20,
-                padding: "20px 16px",
-                border: "2px solid rgba(255,215,64,0.3)",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
-                marginTop: 12
-              }}>
-                {/* Header */}
-                <div style={{ textAlign: "center", marginBottom: 16 }}>
-                  <div style={{ fontSize: 10, letterSpacing: 3, color: "#FFD740", fontWeight: 700 }}>ORI EDUCATION</div>
-                  <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", marginBottom: 8 }}>BIỂU ĐỒ TIẾN BỘ TOEIC</div>
-                  <h3 style={{ fontSize: 22, fontWeight: 900, color: "#fff", margin: 0 }}>{studentInfo?.name || selStudent}</h3>
-                </div>
-
-                {/* Total Progress Badge */}
-                <div style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: 12,
-                  marginBottom: 20
-                }}>
-                  <div style={{
-                    background: "rgba(255,255,255,0.05)",
-                    borderRadius: 12,
-                    padding: "10px 16px",
-                    textAlign: "center"
-                  }}>
-                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>LẦN ĐẦU</div>
-                    <div className="mono" style={{ fontSize: 18, fontWeight: 800, color: "#FF6B35" }}>{firstScore}</div>
-                  </div>
-                  <div style={{
-                    background: totalProgress >= 0 ? "rgba(0,230,118,0.15)" : "rgba(255,82,82,0.15)",
-                    borderRadius: 12,
-                    padding: "10px 16px",
-                    textAlign: "center",
-                    border: `2px solid ${totalProgress >= 0 ? "rgba(0,230,118,0.5)" : "rgba(255,82,82,0.5)"}`
-                  }}>
-                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>TIẾN BỘ</div>
-                    <div className="mono" style={{ fontSize: 18, fontWeight: 900, color: totalProgress >= 0 ? "#00E676" : "#FF5252" }}>
-                      {totalProgress >= 0 ? `+${totalProgress}` : totalProgress}
-                    </div>
-                  </div>
-                  <div style={{
-                    background: "rgba(255,255,255,0.05)",
-                    borderRadius: 12,
-                    padding: "10px 16px",
-                    textAlign: "center"
-                  }}>
-                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>HIỆN TẠI</div>
-                    <div className="mono" style={{ fontSize: 18, fontWeight: 800, color: "#00C9A7" }}>{lastScore}</div>
-                  </div>
-                </div>
-
-                {/* Bar Chart */}
-                <div style={{
-                  background: "rgba(0,0,0,0.3)",
-                  borderRadius: 16,
-                  padding: 16,
-                  marginBottom: 16
-                }}>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginBottom: 12, letterSpacing: 1 }}>ĐIỂM TỔNG QUA CÁC THÁNG</div>
-
-                  <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 120, justifyContent: "center" }}>
-                    {sorted.map((rec, idx) => {
-                      const height = (rec.total / maxScore) * 100;
-                      const prevRec = idx > 0 ? sorted[idx - 1] : null;
-                      const change = prevRec ? rec.total - prevRec.total : 0;
-                      return (
-                        <div key={rec.month} style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1, maxWidth: 60 }}>
-                          {/* Change indicator */}
-                          {change !== 0 && (
-                            <div style={{
-                              fontSize: 9,
-                              fontWeight: 700,
-                              color: change > 0 ? "#00E676" : "#FF5252",
-                              marginBottom: 4
-                            }}>
-                              {change > 0 ? `+${change}` : change}
-                            </div>
-                          )}
-                          {/* Bar */}
-                          <div style={{
-                            width: "100%",
-                            height: `${height}%`,
-                            minHeight: 20,
-                            background: `linear-gradient(180deg, #FFD740 0%, #FF6B35 100%)`,
-                            borderRadius: "8px 8px 4px 4px",
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "flex-end",
-                            alignItems: "center",
-                            paddingBottom: 4,
-                            boxShadow: "0 4px 15px rgba(255,107,53,0.3)"
-                          }}>
-                            <div className="mono" style={{ fontSize: 12, fontWeight: 900, color: "#1a1a2e" }}>{rec.total}</div>
-                          </div>
-                          {/* Month label */}
-                          <div style={{ fontSize: 9, color: "rgba(255,255,255,0.5)", marginTop: 6 }}>{moLabel(rec.month)}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* L/R Breakdown Chart */}
-                <div style={{
-                  background: "rgba(0,0,0,0.3)",
-                  borderRadius: 16,
-                  padding: 16
-                }}>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginBottom: 12, letterSpacing: 1 }}>LISTENING vs READING</div>
-
-                  <div style={{ display: "flex", gap: 16 }}>
-                    {/* Listening chart */}
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 10, color: "#FF6B35", fontWeight: 700, marginBottom: 8, textAlign: "center" }}>🎧 LISTENING</div>
-                      <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 60, justifyContent: "center" }}>
-                        {sorted.map(rec => (
-                          <div key={rec.month} style={{
-                            flex: 1,
-                            maxWidth: 30,
-                            height: `${(rec.listening / 495) * 100}%`,
-                            minHeight: 10,
-                            background: "linear-gradient(180deg, #FF6B35, #FF8C5A)",
-                            borderRadius: 4,
-                            display: "flex",
-                            alignItems: "flex-end",
-                            justifyContent: "center"
-                          }}>
-                            <span style={{ fontSize: 8, fontWeight: 700, color: "#fff", marginBottom: 2 }}>{rec.listening}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Reading chart */}
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 10, color: "#00C9A7", fontWeight: 700, marginBottom: 8, textAlign: "center" }}>📖 READING</div>
-                      <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 60, justifyContent: "center" }}>
-                        {sorted.map(rec => (
-                          <div key={rec.month} style={{
-                            flex: 1,
-                            maxWidth: 30,
-                            height: `${(rec.reading / 495) * 100}%`,
-                            minHeight: 10,
-                            background: "linear-gradient(180deg, #00C9A7, #00E7C1)",
-                            borderRadius: 4,
-                            display: "flex",
-                            alignItems: "flex-end",
-                            justifyContent: "center"
-                          }}>
-                            <span style={{ fontSize: 8, fontWeight: 700, color: "#fff", marginBottom: 2 }}>{rec.reading}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div style={{ textAlign: "center", marginTop: 16, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-                  <div style={{ fontSize: 10, color: "#FFD740", fontWeight: 700 }}>ORI EDUCATION</div>
-                  <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)" }}>📞 0906 303 373</div>
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Detailed History List */}
-          {selStudent && selHistory.length > 0 && (
-            <div className="card" style={{ marginTop: 12 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", marginBottom: 10 }}>📋 CHI TIẾT TỪNG THÁNG</div>
-              {selHistory.sort((a, b) => b.month.localeCompare(a.month)).map((rec, idx, arr) => {
-                const prev = idx + 1 < arr.length ? arr[idx + 1] : null;
-                const diff = prev ? rec.total - prev.total : null;
-                return (
-                  <div key={rec.month} style={{ padding: 12, marginBottom: 6, background: "rgba(255,255,255,0.02)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.04)" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                      <span style={{ fontWeight: 700, fontSize: 13 }}>{moLabel(rec.month)}</span>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <span className="mono" style={{ fontSize: 18, fontWeight: 900, color: "#FFD740" }}>{rec.total}</span>
-                        {diff != null && <span style={{ fontSize: 12, fontWeight: 700, color: diff >= 0 ? "#00E676" : "#FF5252" }}>{diff >= 0 ? `+${diff}` : diff}</span>}
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: 8, fontSize: 11, color: "var(--text-dim)", marginBottom: 4 }}>
-                      <span>🎧 {rec.lCorrect}đúng → <strong style={{ color: "#FF6B35" }}>{rec.listening}</strong></span>
-                      <span>📖 {rec.rCorrect}đúng → <strong style={{ color: "#00C9A7" }}>{rec.reading}</strong></span>
-                    </div>
-                    <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
-                      {["P1", "P2", "P3", "P4", "P5", "P6", "P7"].map(p => (
-                        <span key={p} className="mono" style={{ fontSize: 10, padding: "2px 5px", borderRadius: 4, background: LP.includes(p) ? "rgba(255,107,53,0.06)" : "rgba(0,201,167,0.06)", color: LP.includes(p) ? "#FF6B35" : "#00C9A7" }}>{p}:{rec[p]}</span>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
+          ) : (
+            <div style={{ padding: 40 }}>
+              <div style={{ fontSize: 40, marginBottom: 10 }}>📸</div>
+              <div style={{ fontSize: 15, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>Chưa có báo cáo</div>
+              <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 14 }}>Vui lòng nhập điểm và tạo báo cáo trước</div>
+              <button className="btn-primary" onClick={() => setView("input")} style={{ padding: "10px 24px" }}>📝 Đi đến Nhập điểm</button>
             </div>
           )}
+        </div>
+      )}
 
-          {selStudent && selHistory.length === 0 && (
-            <div className="card" style={{ marginTop: 12, textAlign: "center", padding: 20 }}>
-              <div style={{ color: "var(--text-dim)", fontSize: 13 }}>Chưa có bản ghi điểm</div>
+
+      {/* ═══ BẰNG KHEN ═══ */}
+      {view === "cert" && (
+        <div>
+          <div className="card">
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#FFD740", marginBottom: 12 }}>🏆 TẠO BẰNG KHEN</div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+              <div>
+                <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>CHỌN HỌC VIÊN</label>
+                <select className="input" value={certStudent} onChange={e => {
+                  const val = e.target.value;
+                  setCertStudent(val);
+                  if (val) {
+                    const stu = students.find(s => s.code === val);
+                    if (stu) {
+                      setCertName(stu.name);
+                      api.getScores(val).then(d => {
+                        const latest = d.scores?.sort((a,b) => b.month.localeCompare(a.month))[0];
+                        if (latest) { setCertL(latest.listening || 0); setCertR(latest.reading || 0); }
+                      }).catch(() => {});
+                    }
+                  }
+                }}>
+                  <option value="">-- Chọn hoặc nhập tay --</option>
+                  {students.map(s => <option key={s.code} value={s.code}>{s.name} ({s.code})</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>GIÁO VIÊN HƯỚNG DẪN</label>
+                <select className="input" value={certTeacher} onChange={e => setCertTeacher(e.target.value)}>
+                  <option>Trần Ngọc Diễm</option>
+                  <option>Đỗ Ngọc Loan</option>
+                  <option>Grace Phạm</option>
+                </select>
+              </div>
             </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 8, marginBottom: 14 }}>
+              <div>
+                <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>TÊN HỌC VIÊN</label>
+                <input className="input" type="text" value={certName} onChange={e => setCertName(e.target.value)} placeholder="Nhập tên..." style={{ width: "100%" }} />
+              </div>
+              <div>
+                <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>LISTENING</label>
+                <input className="input" type="number" min="0" max="495" value={certL} onChange={e => setCertL(Math.min(495, Math.max(0, Number(e.target.value) || 0)))} style={{ width: "100%" }} />
+              </div>
+              <div>
+                <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>READING</label>
+                <input className="input" type="number" min="0" max="495" value={certR} onChange={e => setCertR(Math.min(495, Math.max(0, Number(e.target.value) || 0)))} style={{ width: "100%" }} />
+              </div>
+              <div>
+                <label style={{ fontSize: 10, color: "var(--text-dim)", display: "block", marginBottom: 4 }}>TỔNG</label>
+                <div className="input mono" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 900, color: "#FFD740", background: "rgba(255,215,64,0.06)", border: "1px solid rgba(255,215,64,0.2)", letterSpacing: 1 }}>
+                  {certTotal}
+                </div>
+              </div>
+            </div>
+
+            <button className="btn-primary" onClick={async () => {
+              try {
+                if (typeof window.html2canvas === 'undefined') {
+                  const s = document.createElement('script');
+                  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                  document.head.appendChild(s);
+                  await new Promise(r => { s.onload = r; s.onerror = () => r(); });
+                }
+                const el = certRef.current;
+                if (!el) return;
+                flash("⏳ Đang tạo ảnh...");
+                const canvas = await window.html2canvas(el, { scale: 3, useCORS: true, backgroundColor: "#ffffff", logging: false });
+                const link = document.createElement('a');
+                link.download = `BangKhen-${certName.replace(/\s+/g, '-')}-${certTotal}.jpg`;
+                link.href = canvas.toDataURL('image/jpeg', 0.95);
+                link.click();
+                flash("✅ Đã tải bằng khen!");
+              } catch (err) { flash("Lỗi: " + err.message, "error"); }
+            }} style={{ width: "100%", fontSize: 15, padding: "14px 0" }}>
+              📥 TẢI XUỐNG BẰNG KHEN (JPG)
+            </button>
+          </div>
+
+          <div style={{ marginTop: 14, fontSize: 11, color: "var(--text-dim)", textAlign: "center", marginBottom: 6 }}>
+            📸 Xem trước · Nhấn nút tải xuống để lưu JPG
+          </div>
+
+          {/* BẰNG KHEN v3 — Balanced professional layout */}
+          <div ref={certRef} style={{
+            width: "100%", maxWidth: 560, margin: "0 auto",
+            aspectRatio: "210/297",
+            background: "#ffffff",
+            position: "relative", overflow: "hidden",
+            fontFamily: "'Georgia', 'Times New Roman', serif",
+            color: "#333",
+          }}>
+            {/* Borders */}
+            <div style={{ position: "absolute", inset: 0, border: "12px solid #c8a84e" }} />
+            <div style={{ position: "absolute", inset: 16, border: "2px solid #c8a84e" }} />
+            <div style={{ position: "absolute", inset: 20, border: "0.5px solid rgba(200,168,78,0.25)" }} />
+            {[["top","left"],["top","right"],["bottom","left"],["bottom","right"]].map(([v,h]) => (
+              <div key={`c${v}${h}`} style={{
+                position: "absolute", [v]: 20, [h]: 20, width: 28, height: 28,
+                [`border${v[0].toUpperCase()+v.slice(1)}`]: "2.5px solid #b8972f",
+                [`border${h[0].toUpperCase()+h.slice(1)}`]: "2.5px solid #b8972f",
+              }} />
+            ))}
+
+            {/* Content — justify-content: space-between fills ALL vertical space evenly */}
+            <div style={{
+              position: "relative", zIndex: 1,
+              display: "flex", flexDirection: "column", alignItems: "center",
+              height: "100%", textAlign: "center",
+              padding: "5.5% 8% 4.5%",
+              justifyContent: "space-between",
+            }}>
+
+              {/* SECTION 1: Header */}
+              <div style={{ width: "100%" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                  <div style={{
+                    background: "linear-gradient(135deg, #1a3a7a, #234ea1)",
+                    color: "#fff", padding: "5px 16px",
+                    fontWeight: 800, fontSize: 10, letterSpacing: 3,
+                    fontFamily: "system-ui, sans-serif",
+                  }}>ORI ACADEMY</div>
+                  <div style={{ fontSize: 10.5, color: "#888", fontStyle: "italic" }}>
+                    TP. Hồ Chí Minh, ngày {new Date().getDate()} tháng {new Date().getMonth() + 1} năm {new Date().getFullYear()}
+                  </div>
+                </div>
+                <div style={{ width: "100%", height: 2, background: "linear-gradient(90deg, #c8a84e, #e8d28a, #c8a84e)" }} />
+              </div>
+
+              {/* SECTION 2: Title */}
+              <div>
+                <div style={{
+                  fontFamily: "'Playfair Display', 'Georgia', serif",
+                  fontSize: 46, fontWeight: 900,
+                  color: "#1a3a7a", letterSpacing: 8,
+                  textTransform: "uppercase",
+                  marginBottom: 3,
+                }}>BẰNG KHEN</div>
+                <div style={{
+                  fontSize: 10, letterSpacing: 5,
+                  color: "#c8a84e", textTransform: "uppercase",
+                  fontWeight: 700, fontFamily: "system-ui, sans-serif",
+                  marginBottom: 4,
+                }}>TOEIC ACHIEVEMENT AWARD</div>
+                <div style={{ fontSize: 13, color: "#777", fontStyle: "italic" }}>
+                  Hệ thống Anh ngữ ORI trân trọng trao tặng cho
+                </div>
+              </div>
+
+              {/* SECTION 3: Student Name */}
+              <div style={{
+                fontFamily: "'Great Vibes', cursive",
+                fontSize: 52, color: "#c8a84e",
+                lineHeight: 1.15,
+                textShadow: "1px 2px 4px rgba(0,0,0,0.06)",
+                maxWidth: "95%", wordBreak: "break-word",
+              }}>
+                {certName || "Họ và Tên"}
+              </div>
+
+              {/* SECTION 4: Description + Score Box */}
+              <div style={{ width: "100%" }}>
+                <div style={{ fontSize: 12.5, color: "#666", lineHeight: 1.6, marginBottom: 12 }}>
+                  Đã hoàn thành xuất sắc kỳ thi thử TOEIC chuẩn quốc tế với kết quả đạt được như sau:
+                </div>
+
+                <div style={{
+                  border: "2px solid #c8a84e",
+                  padding: "14px 20px 18px",
+                  margin: "0 auto", maxWidth: 320,
+                  position: "relative", background: "rgba(200,168,78,0.02)",
+                }}>
+                  {[["top","left"],["top","right"],["bottom","left"],["bottom","right"]].map(([v,h]) => (
+                    <div key={`s${v}${h}`} style={{
+                      position: "absolute", [v]: -3, [h]: -3, width: 10, height: 10,
+                      [`border${v[0].toUpperCase()+v.slice(1)}`]: "2px solid #b8972f",
+                      [`border${h[0].toUpperCase()+h.slice(1)}`]: "2px solid #b8972f",
+                    }} />
+                  ))}
+
+                  <div style={{ display: "flex", justifyContent: "center", gap: 36 }}>
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "#666", letterSpacing: 1.5, marginBottom: 3, fontFamily: "system-ui, sans-serif" }}>Listening</div>
+                      <div style={{ fontFamily: "'Georgia', serif", fontSize: 34, fontWeight: 700, color: "#1a3a7a", lineHeight: 1 }}>{certL}</div>
+                    </div>
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "#666", letterSpacing: 1.5, marginBottom: 3, fontFamily: "system-ui, sans-serif" }}>Reading</div>
+                      <div style={{ fontFamily: "'Georgia', serif", fontSize: 34, fontWeight: 700, color: "#1a3a7a", lineHeight: 1 }}>{certR}</div>
+                    </div>
+                  </div>
+
+                  <div style={{ width: "50%", height: 1.5, background: "linear-gradient(90deg, transparent, #c8a84e, transparent)", margin: "10px auto 8px" }} />
+
+                  <div style={{ fontSize: 9, letterSpacing: 3, color: "#aaa", textTransform: "uppercase", fontFamily: "system-ui, sans-serif", marginBottom: 2 }}>
+                    TỔNG ĐIỂM ĐẠT ĐƯỢC
+                  </div>
+                  <div style={{
+                    fontFamily: "'Georgia', serif",
+                    fontSize: 52, fontWeight: 700,
+                    color: "#c8a84e", lineHeight: 1,
+                    textShadow: "1px 2px 4px rgba(200,168,78,0.15)",
+                  }}>{certTotal}</div>
+                </div>
+              </div>
+
+              {/* SECTION 5: Signatures */}
+              <div style={{ width: "100%" }}>
+                <div style={{ width: "100%", height: 1, background: "linear-gradient(90deg, #c8a84e, #e8d28a, #c8a84e)", marginBottom: 14 }} />
+
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "0 4%" }}>
+                  <div style={{ textAlign: "center", flex: 1 }}>
+                    <div style={{ fontFamily: "'Great Vibes', cursive", fontSize: 26, color: "#1a3a7a", marginBottom: 3, lineHeight: 1.1 }}>{certTeacher}</div>
+                    <div style={{ width: 140, height: 1, background: "#999", margin: "0 auto 4px" }} />
+                    <div style={{ fontSize: 7.5, letterSpacing: 2, color: "#aaa", textTransform: "uppercase", fontFamily: "system-ui, sans-serif", marginBottom: 2 }}>GIÁO VIÊN HƯỚNG DẪN</div>
+                    <div style={{ fontSize: 11.5, color: "#555" }}>{certTeacher}</div>
+                  </div>
+                  <div style={{ textAlign: "center", flex: 1 }}>
+                    <div style={{ fontFamily: "'Great Vibes', cursive", fontSize: 26, color: "#1a3a7a", marginBottom: 3, lineHeight: 1.1 }}>Trần Ngọc Diễm</div>
+                    <div style={{ width: 140, height: 1, background: "#999", margin: "0 auto 4px" }} />
+                    <div style={{ fontSize: 7.5, letterSpacing: 2, color: "#aaa", textTransform: "uppercase", fontFamily: "system-ui, sans-serif", marginBottom: 2 }}>GIÁM ĐỐC TRUNG TÂM</div>
+                    <div style={{ fontSize: 11.5, color: "#555" }}>Trần Ngọc Diễm</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ HISTORY ═══ */}
+      {view === "history" && (
+        <div className="card">
+          <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", marginBottom: 10 }}>📈 LỊCH SỬ</div>
+          {students.length === 0 ? <div style={{ textAlign: "center", padding: 24, color: "var(--text-dim)" }}>📭 Chưa có học viên</div> : (
+            <>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 12 }}>
+                {students.map(s => (
+                  <button key={s.code} onClick={()=>loadHistory(s.code)} className={`tag ${selStudent===s.code?"tag-active":"tag-inactive"}`}>
+                    {s.name} <span style={{opacity:0.4,fontSize:10}}>{s.code}</span>
+                  </button>
+                ))}
+              </div>
+              {selStudent && (
+                <div>
+                  {selHistory.length === 0 ? <div style={{textAlign:"center",padding:16,color:"var(--text-dim)",fontSize:13}}>Chưa có bản ghi</div> :
+                    selHistory.sort((a,b)=>b.month.localeCompare(a.month)).map((rec, idx, arr) => {
+                      const prev = idx+1 < arr.length ? arr[idx+1] : null;
+                      const diff = prev ? rec.total - prev.total : null;
+                      return (
+                        <div key={rec.month} style={{ padding: 12, marginBottom: 6, background: "rgba(255,255,255,0.02)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.04)" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                            <span style={{ fontWeight: 700, fontSize: 13 }}>{moLabel(rec.month)}</span>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                              <span className="mono" style={{ fontSize: 18, fontWeight: 900, color: "#FFD740" }}>{rec.total}</span>
+                              {diff!=null && <span style={{fontSize:12,fontWeight:700,color:diff>=0?"#00E676":"#FF5252"}}>{diff>=0?`+${diff}`:diff}</span>}
+                            </div>
+                          </div>
+                          <div style={{ display: "flex", gap: 8, fontSize: 11, color: "var(--text-dim)", marginBottom: 4 }}>
+                            <span>🎧 {rec.lCorrect}đúng → <strong style={{color:"#FF6B35"}}>{rec.listening}</strong></span>
+                            <span>📖 {rec.rCorrect}đúng → <strong style={{color:"#00C9A7"}}>{rec.reading}</strong></span>
+                          </div>
+                          <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
+                            {["P1","P2","P3","P4","P5","P6","P7"].map(p=>(
+                              <span key={p} className="mono" style={{fontSize:10,padding:"2px 5px",borderRadius:4,background:LP.includes(p)?"rgba(255,107,53,0.06)":"rgba(0,201,167,0.06)",color:LP.includes(p)?"#FF6B35":"#00C9A7"}}>{p}:{rec[p]}</span>
+                            ))}
+                          </div>
+                          <div style={{ display: "flex", gap: 4, marginTop: 6 }}>
+                            <button onClick={() => {
+                              const stu = students.find(s=>s.code===selStudent);
+                              const url = `${window.location.origin}/report/${selStudent}`;
+                              const msg = `Chào PH ${stu?.name||selStudent},\n\nBáo cáo TOEIC ${moLabel(rec.month)}: ${rec.total}/990 (L: ${rec.listening} + R: ${rec.reading}).\n\n👉 Xem chi tiết: ${url}\n\nORI TOEIC · 0906 303 373`;
+                              navigator.clipboard.writeText(msg).then(()=>flash("✅ Đã copy!")).catch(()=>{});
+                            }} style={{fontSize:10,padding:"4px 8px",border:"1px solid rgba(0,168,255,0.2)",borderRadius:6,background:"transparent",color:"#00A8FF",cursor:"pointer",fontWeight:600}}>
+                              💬 Copy Zalo
+                            </button>
+                            <button onClick={() => {
+                              navigator.clipboard.writeText(`${window.location.origin}/report/${selStudent}`).then(()=>flash("✅ Đã copy link!")).catch(()=>{});
+                            }} style={{fontSize:10,padding:"4px 8px",border:"1px solid rgba(255,255,255,0.06)",borderRadius:6,background:"transparent",color:"rgba(255,255,255,0.3)",cursor:"pointer",fontWeight:600}}>
+                              🔗 Link
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  }
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -1325,7 +872,7 @@ export default function Home() {
       {view === "lookup" && (
         <div className="card">
           <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", marginBottom: 10 }}>🔍 TRA CỨU</div>
-          <input className="input" value={lookupQ} onChange={e => doLookup(e.target.value)} placeholder="Nhập tên, SĐT, hoặc mã HV..." style={{ marginBottom: 12 }} />
+          <input className="input" value={lookupQ} onChange={e=>doLookup(e.target.value)} placeholder="Nhập tên, SĐT, hoặc mã HV..." style={{marginBottom:12}} />
           {lookupResults.map(stu => (
             <div key={stu.code} style={{ padding: 12, marginBottom: 6, background: "rgba(255,255,255,0.02)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.04)" }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
