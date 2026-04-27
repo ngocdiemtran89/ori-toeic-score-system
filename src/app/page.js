@@ -803,15 +803,17 @@ export default function Home() {
 
               return (
                 <div ref={certRef} style={{
-                  width: "100%",
-                  aspectRatio: "210/297",
+                  width: 560,
+                  minHeight: 792, /* 560 * (297/210) = 792 */
+                  maxWidth: "100%",
                   background: "linear-gradient(180deg, #ffffff 0%, #fefefe 100%)",
                   border: "14px solid #1e3a8a",
                   position: "relative",
                   boxSizing: "border-box",
                   fontFamily: "Times New Roman, serif",
                   color: "#1e3a8a",
-                  overflow: "hidden"
+                  overflow: "hidden",
+                  margin: "0 auto" /* Giữ cho bằng khen luôn ở giữa */
                 }}>
                   {/* Inner gold border frame */}
                   <div style={{
