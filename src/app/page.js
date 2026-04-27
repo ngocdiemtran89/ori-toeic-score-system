@@ -702,20 +702,25 @@ export default function Home() {
           setExporting(true);
           try {
             const html2canvas = (await import("html2canvas")).default;
+            
+            // Đợi fonts & DOM cập nhật
+            await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
             const canvas = await html2canvas(certRef.current, {
               scale: 2,
               backgroundColor: "#ffffff",
               useCORS: true,
-              logging: false
+              logging: false,
+              allowTaint: true
             });
             const link = document.createElement("a");
-            link.download = `bangkhen-${certName.replace(/\s+/g, "-")}-${Date.now()}.jpg`;
-            link.href = canvas.toDataURL("image/jpeg", 0.95);
+            link.download = `bangkhen-${certName.replace(/\s+/g, "-")}-${Date.now()}.png`;
+            link.href = canvas.toDataURL("image/png");
             link.click();
             flash("✅ Đã tải xuống bằng khen!");
           } catch (err) {
             console.error(err);
-            flash("❌ Lỗi xuất ảnh", "error");
+            flash("❌ Lỗi xuất ảnh: " + err.message, "error");
           }
           setExporting(false);
         };
@@ -786,7 +791,7 @@ export default function Home() {
                 disabled={exporting}
                 style={{ width: "100%" }}
               >
-                {exporting ? "⏳ Đang xuất..." : "📥 TẢI XUỐNG BẰNG KHEN (JPG)"}
+                {exporting ? "⏳ Đang xuất..." : "📥 TẢI XUỐNG BẰNG KHEN (PNG)"}
               </button>
             </div>
 
