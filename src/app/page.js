@@ -701,28 +701,43 @@ export default function Home() {
           if (!certRef.current) return;
           setExporting(true);
           try {
-            const html2canvas = (await import("html2canvas")).default;
-            
-            // Đợi fonts & DOM cập nhật
+            // Tải html2canvas qua CDN để tránh lỗi Webpack chunking khi gọi nhiều lần
+            if (typeof window.html2canvas === 'undefined') {
+              await new Promise((resolve, reject) => {
+                const script = document.createElement("script");
+                script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+                script.onload = resolve;
+                script.onerror = () => reject(new Error("Không tải được thư viện ảnh"));
+                document.head.appendChild(script);
+              });
+            }
+
+            // Đợi UI render xong
             await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-            const canvas = await html2canvas(certRef.current, {
-              scale: 2,
-              backgroundColor: "#ffffff",
-              useCORS: true,
-              logging: false,
-              allowTaint: true
-            });
+            // Bọc bằng timeout 10 giây để tránh treo
+            const canvas = await Promise.race([
+              window.html2canvas(certRef.current, {
+                scale: 2,
+                backgroundColor: "#ffffff",
+                useCORS: true,
+                allowTaint: true,
+                logging: false
+              }),
+              new Promise((_, reject) => setTimeout(() => reject(new Error("Quá thời gian tạo ảnh, vui lòng thử lại!")), 10000))
+            ]);
+
             const link = document.createElement("a");
             link.download = `bangkhen-${certName.replace(/\s+/g, "-")}-${Date.now()}.png`;
             link.href = canvas.toDataURL("image/png");
             link.click();
             flash("✅ Đã tải xuống bằng khen!");
           } catch (err) {
-            console.error(err);
-            flash("❌ Lỗi xuất ảnh: " + err.message, "error");
+            console.error("Lỗi xuất ảnh:", err);
+            flash("❌ Lỗi: " + err.message, "error");
+          } finally {
+            setExporting(false);
           }
-          setExporting(false);
         };
 
         const today = new Date();
