@@ -267,15 +267,7 @@ export default function Home() {
         </div>
         <div style={{ display: "flex", justifyContent: "center", gap: 5, flexWrap: "wrap" }}>
           {[{k:"input",l:"📝 Nhập"},{k:"report",l:"📊 Báo cáo"},{k:"capture",l:"📸 Chụp ảnh"},{k:"cert",l:"🏆 Bằng khen"},{k:"history",l:"📈 Lịch sử"}].map(t =>
-            <button key={t.k} onClick={()=>{
-              setView(t.k);
-              // Preload html2canvas khi vào tab bằng khen
-              if (t.k === 'cert' && typeof window !== 'undefined' && typeof window.html2canvas === 'undefined') {
-                const s = document.createElement('script');
-                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-                document.head.appendChild(s);
-              }
-            }} className={`tag ${view===t.k?"tag-active":"tag-inactive"}`}>{t.l}</button>
+            <button key={t.k} onClick={()=>setView(t.k)} className={`tag ${view===t.k?"tag-active":"tag-inactive"}`}>{t.l}</button>
           )}
         </div>
       </div>
@@ -550,14 +542,9 @@ export default function Home() {
               </div>
               <button className="btn-primary" onClick={async () => {
                 try {
-                  if (typeof window.html2canvas === 'undefined') {
-                    const s = document.createElement('script');
-                    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-                    document.head.appendChild(s);
-                    await new Promise(r => s.onload = r);
-                  }
+                  const html2canvas = (await import("html2canvas")).default;
                   const el = document.getElementById('capture-area');
-                  const canvas = await window.html2canvas(el, { scale: 2, backgroundColor: '#0f0f1a' });
+                  const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#0f0f1a' });
                   const link = document.createElement('a');
                   link.download = `toeic-${report.name.replace(/\s+/g, '-')}-${report.month}.png`;
                   link.href = canvas.toDataURL('image/png');
@@ -643,16 +630,11 @@ export default function Home() {
               setCertExporting(true);
               flash("⏳ Đang tạo ảnh bằng khen...");
               try {
-                if (typeof window.html2canvas === 'undefined') {
-                  const s = document.createElement('script');
-                  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-                  document.head.appendChild(s);
-                  await new Promise((res, rej) => { s.onload = res; s.onerror = rej; });
-                }
+                const html2canvas = (await import("html2canvas")).default;
                 const el = certRef.current;
                 if (!el) { flash("Không tìm thấy bằng khen", "error"); return; }
                 await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-                const canvas = await window.html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff", logging: false, allowTaint: true });
+                const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff", logging: false, allowTaint: true });
                 const link = document.createElement('a');
                 link.download = `BangKhen-${certName.replace(/\s+/g, '-')}-${certTotal}.jpg`;
                 link.href = canvas.toDataURL('image/jpeg', 0.92);
