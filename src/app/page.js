@@ -115,6 +115,17 @@ export default function Home() {
   const flash = (msg, type="success") => { setToast({msg,type}); setTimeout(()=>setToast(null),3000); };
   const moLabel = (m) => { const [y,mo]=m.split("-"); return `T${parseInt(mo)}/${y}`; };
 
+  // Load Google Fonts for certificate (needed for html2canvas)
+  useEffect(() => {
+    if (typeof window !== "undefined" && !document.getElementById("cert-fonts")) {
+      const link = document.createElement("link");
+      link.id = "cert-fonts";
+      link.rel = "stylesheet";
+      link.href = "https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@700;900&display=swap";
+      document.head.appendChild(link);
+    }
+  }, []);
+
   // Load students list
   useEffect(() => { api.getStudents().then(d => setStudents(d.students||[])).catch(()=>{}); }, []);
 
@@ -248,6 +259,71 @@ export default function Home() {
       const d = await api.getStudents(q);
       setLookupResults(d.students || []);
     } else setLookupResults([]);
+  };
+
+  // ─── Certificate Export Function (fixed) ─────────────────────
+  const exportCertificate = async () => {
+    if (certExporting) return;
+    setCertExporting(true);
+    flash("⏳ Đang tạo ảnh bằng khen...");
+
+    try {
+      // Dynamically load html2canvas
+      let html2canvas;
+      try {
+        const mod = await import("html2canvas");
+        html2canvas = mod.default || mod;
+      } catch (importErr) {
+        // Fallback: load from CDN if npm package not available
+        await new Promise((resolve, reject) => {
+          if (window.html2canvas) { resolve(); return; }
+          const script = document.createElement("script");
+          script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+          script.onload = resolve;
+          script.onerror = () => reject(new Error("Không tải được html2canvas. Kiểm tra kết nối mạng."));
+          document.head.appendChild(script);
+        });
+        html2canvas = window.html2canvas;
+      }
+
+      const el = certRef.current;
+      if (!el) {
+        flash("Không tìm thấy bằng khen element", "error");
+        setCertExporting(false);
+        return;
+      }
+
+      // Wait for fonts to load
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+      // Extra delay for rendering
+      await new Promise(r => setTimeout(r, 500));
+
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+        allowTaint: true,
+        // Fix: set explicit width/height for html2canvas
+        width: el.scrollWidth,
+        height: el.scrollHeight,
+        windowWidth: el.scrollWidth,
+        windowHeight: el.scrollHeight,
+      });
+
+      const link = document.createElement("a");
+      link.download = `BangKhen-${certName.replace(/\s+/g, "-")}-${certTotal}.jpg`;
+      link.href = canvas.toDataURL("image/jpeg", 0.92);
+      link.click();
+      flash("✅ Đã tải bằng khen!");
+    } catch (err) {
+      console.error("Certificate export error:", err);
+      flash("❌ Lỗi xuất bằng khen: " + err.message, "error");
+    } finally {
+      setCertExporting(false);
+    }
   };
 
   return (
@@ -542,7 +618,21 @@ export default function Home() {
               </div>
               <button className="btn-primary" onClick={async () => {
                 try {
-                  const html2canvas = (await import("html2canvas")).default;
+                  let html2canvas;
+                  try {
+                    const mod = await import("html2canvas");
+                    html2canvas = mod.default || mod;
+                  } catch {
+                    await new Promise((resolve, reject) => {
+                      if (window.html2canvas) { resolve(); return; }
+                      const script = document.createElement("script");
+                      script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+                      script.onload = resolve;
+                      script.onerror = () => reject(new Error("Không tải được html2canvas"));
+                      document.head.appendChild(script);
+                    });
+                    html2canvas = window.html2canvas;
+                  }
                   const el = document.getElementById('capture-area');
                   const canvas = await html2canvas(el, { scale: 2, backgroundColor: '#0f0f1a' });
                   const link = document.createElement('a');
@@ -625,27 +715,7 @@ export default function Home() {
               </div>
             </div>
 
-            <button className="btn-primary" disabled={certExporting} onClick={async () => {
-              if (certExporting) return;
-              setCertExporting(true);
-              flash("⏳ Đang tạo ảnh bằng khen...");
-              try {
-                const html2canvas = (await import("html2canvas")).default;
-                const el = certRef.current;
-                if (!el) { flash("Không tìm thấy bằng khen", "error"); return; }
-                await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-                const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff", logging: false, allowTaint: true });
-                const link = document.createElement('a');
-                link.download = `BangKhen-${certName.replace(/\s+/g, '-')}-${certTotal}.jpg`;
-                link.href = canvas.toDataURL('image/jpeg', 0.92);
-                link.click();
-                flash("✅ Đã tải bằng khen!");
-              } catch (err) {
-                flash("❌ Lỗi: " + err.message, "error");
-              } finally {
-                setCertExporting(false);
-              }
-            }} style={{ width: "100%", fontSize: 15, padding: "14px 0", opacity: certExporting ? 0.65 : 1 }}>
+            <button className="btn-primary" disabled={certExporting} onClick={exportCertificate} style={{ width: "100%", fontSize: 15, padding: "14px 0", opacity: certExporting ? 0.65 : 1 }}>
               {certExporting ? "⏳ Đang tạo... vui lòng đợi" : "📥 TẢI XUỐNG BẰNG KHEN (JPG)"}
             </button>
           </div>
@@ -654,14 +724,15 @@ export default function Home() {
             📸 Xem trước · Nhấn nút tải xuống để lưu JPG
           </div>
 
-          {/* BẰNG KHEN v3 — Balanced professional layout */}
+          {/* BẰNG KHEN v4 — Fixed: explicit dimensions, no aspect-ratio, canvas-safe fonts */}
           <div ref={certRef} style={{
-            width: "100%", maxWidth: 560, margin: "0 auto",
-            aspectRatio: "210/297",
+            width: 560, minHeight: 792, /* A4 ratio: 560 * 297/210 ≈ 792 */
+            maxWidth: "100%",
             background: "#ffffff",
             position: "relative", overflow: "hidden",
             fontFamily: "'Georgia', 'Times New Roman', serif",
             color: "#333",
+            /* Fix: no aspect-ratio — html2canvas doesn't handle it well */
           }}>
             {/* Borders */}
             <div style={{ position: "absolute", inset: 0, border: "12px solid #c8a84e" }} />
@@ -675,13 +746,14 @@ export default function Home() {
               }} />
             ))}
 
-            {/* Content — justify-content: space-between fills ALL vertical space evenly */}
+            {/* Content */}
             <div style={{
               position: "relative", zIndex: 1,
               display: "flex", flexDirection: "column", alignItems: "center",
-              height: "100%", textAlign: "center",
-              padding: "5.5% 8% 4.5%",
+              minHeight: 792, textAlign: "center",
+              padding: "44px 45px 36px",
               justifyContent: "space-between",
+              boxSizing: "border-box",
             }}>
 
               {/* SECTION 1: Header */}
@@ -691,9 +763,9 @@ export default function Home() {
                     background: "linear-gradient(135deg, #1a3a7a, #234ea1)",
                     color: "#fff", padding: "5px 16px",
                     fontWeight: 800, fontSize: 10, letterSpacing: 3,
-                    fontFamily: "system-ui, sans-serif",
+                    fontFamily: "system-ui, Arial, sans-serif",
                   }}>ORI ACADEMY</div>
-                  <div style={{ fontSize: 10.5, color: "#888", fontStyle: "italic" }}>
+                  <div style={{ fontSize: 10.5, color: "#888", fontStyle: "italic", fontFamily: "Georgia, 'Times New Roman', serif" }}>
                     TP. Hồ Chí Minh, ngày {new Date().getDate()} tháng {new Date().getMonth() + 1} năm {new Date().getFullYear()}
                   </div>
                 </div>
@@ -703,7 +775,7 @@ export default function Home() {
               {/* SECTION 2: Title */}
               <div>
                 <div style={{
-                  fontFamily: "'Playfair Display', 'Georgia', serif",
+                  fontFamily: "'Playfair Display', Georgia, serif",
                   fontSize: 46, fontWeight: 900,
                   color: "#1a3a7a", letterSpacing: 8,
                   textTransform: "uppercase",
@@ -712,10 +784,10 @@ export default function Home() {
                 <div style={{
                   fontSize: 10, letterSpacing: 5,
                   color: "#c8a84e", textTransform: "uppercase",
-                  fontWeight: 700, fontFamily: "system-ui, sans-serif",
+                  fontWeight: 700, fontFamily: "system-ui, Arial, sans-serif",
                   marginBottom: 4,
                 }}>TOEIC ACHIEVEMENT AWARD</div>
-                <div style={{ fontSize: 13, color: "#777", fontStyle: "italic" }}>
+                <div style={{ fontSize: 13, color: "#777", fontStyle: "italic", fontFamily: "Georgia, 'Times New Roman', serif" }}>
                   Hệ thống Anh ngữ ORI trân trọng trao tặng cho
                 </div>
               </div>
@@ -733,7 +805,7 @@ export default function Home() {
 
               {/* SECTION 4: Description + Score Box */}
               <div style={{ width: "100%" }}>
-                <div style={{ fontSize: 12.5, color: "#666", lineHeight: 1.6, marginBottom: 12 }}>
+                <div style={{ fontSize: 12.5, color: "#666", lineHeight: 1.6, marginBottom: 12, fontFamily: "Georgia, 'Times New Roman', serif" }}>
                   Đã hoàn thành xuất sắc kỳ thi thử TOEIC chuẩn quốc tế với kết quả đạt được như sau:
                 </div>
 
@@ -753,22 +825,22 @@ export default function Home() {
 
                   <div style={{ display: "flex", justifyContent: "center", gap: 36 }}>
                     <div style={{ textAlign: "center" }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "#666", letterSpacing: 1.5, marginBottom: 3, fontFamily: "system-ui, sans-serif" }}>Listening</div>
-                      <div style={{ fontFamily: "'Georgia', serif", fontSize: 34, fontWeight: 700, color: "#1a3a7a", lineHeight: 1 }}>{certL}</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "#666", letterSpacing: 1.5, marginBottom: 3, fontFamily: "system-ui, Arial, sans-serif" }}>Listening</div>
+                      <div style={{ fontFamily: "Georgia, serif", fontSize: 34, fontWeight: 700, color: "#1a3a7a", lineHeight: 1 }}>{certL}</div>
                     </div>
                     <div style={{ textAlign: "center" }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "#666", letterSpacing: 1.5, marginBottom: 3, fontFamily: "system-ui, sans-serif" }}>Reading</div>
-                      <div style={{ fontFamily: "'Georgia', serif", fontSize: 34, fontWeight: 700, color: "#1a3a7a", lineHeight: 1 }}>{certR}</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "#666", letterSpacing: 1.5, marginBottom: 3, fontFamily: "system-ui, Arial, sans-serif" }}>Reading</div>
+                      <div style={{ fontFamily: "Georgia, serif", fontSize: 34, fontWeight: 700, color: "#1a3a7a", lineHeight: 1 }}>{certR}</div>
                     </div>
                   </div>
 
                   <div style={{ width: "50%", height: 1.5, background: "linear-gradient(90deg, transparent, #c8a84e, transparent)", margin: "10px auto 8px" }} />
 
-                  <div style={{ fontSize: 9, letterSpacing: 3, color: "#aaa", textTransform: "uppercase", fontFamily: "system-ui, sans-serif", marginBottom: 2 }}>
+                  <div style={{ fontSize: 9, letterSpacing: 3, color: "#aaa", textTransform: "uppercase", fontFamily: "system-ui, Arial, sans-serif", marginBottom: 2 }}>
                     TỔNG ĐIỂM ĐẠT ĐƯỢC
                   </div>
                   <div style={{
-                    fontFamily: "'Georgia', serif",
+                    fontFamily: "Georgia, serif",
                     fontSize: 52, fontWeight: 700,
                     color: "#c8a84e", lineHeight: 1,
                     textShadow: "1px 2px 4px rgba(200,168,78,0.15)",
@@ -784,14 +856,14 @@ export default function Home() {
                   <div style={{ textAlign: "center", flex: 1 }}>
                     <div style={{ fontFamily: "'Great Vibes', cursive", fontSize: 26, color: "#1a3a7a", marginBottom: 3, lineHeight: 1.1 }}>{certTeacher}</div>
                     <div style={{ width: 140, height: 1, background: "#999", margin: "0 auto 4px" }} />
-                    <div style={{ fontSize: 7.5, letterSpacing: 2, color: "#aaa", textTransform: "uppercase", fontFamily: "system-ui, sans-serif", marginBottom: 2 }}>GIÁO VIÊN HƯỚNG DẪN</div>
-                    <div style={{ fontSize: 11.5, color: "#555" }}>{certTeacher}</div>
+                    <div style={{ fontSize: 7.5, letterSpacing: 2, color: "#aaa", textTransform: "uppercase", fontFamily: "system-ui, Arial, sans-serif", marginBottom: 2 }}>GIÁO VIÊN HƯỚNG DẪN</div>
+                    <div style={{ fontSize: 11.5, color: "#555", fontFamily: "Georgia, 'Times New Roman', serif" }}>{certTeacher}</div>
                   </div>
                   <div style={{ textAlign: "center", flex: 1 }}>
                     <div style={{ fontFamily: "'Great Vibes', cursive", fontSize: 26, color: "#1a3a7a", marginBottom: 3, lineHeight: 1.1 }}>Trần Ngọc Diễm</div>
                     <div style={{ width: 140, height: 1, background: "#999", margin: "0 auto 4px" }} />
-                    <div style={{ fontSize: 7.5, letterSpacing: 2, color: "#aaa", textTransform: "uppercase", fontFamily: "system-ui, sans-serif", marginBottom: 2 }}>GIÁM ĐỐC TRUNG TÂM</div>
-                    <div style={{ fontSize: 11.5, color: "#555" }}>Trần Ngọc Diễm</div>
+                    <div style={{ fontSize: 7.5, letterSpacing: 2, color: "#aaa", textTransform: "uppercase", fontFamily: "system-ui, Arial, sans-serif", marginBottom: 2 }}>GIÁM ĐỐC TRUNG TÂM</div>
+                    <div style={{ fontSize: 11.5, color: "#555", fontFamily: "Georgia, 'Times New Roman', serif" }}>Trần Ngọc Diễm</div>
                   </div>
                 </div>
               </div>
