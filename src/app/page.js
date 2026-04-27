@@ -110,6 +110,7 @@ export default function Home() {
   const certTotal = certL + certR;
   const [certTeacher, setCertTeacher] = useState("Trần Ngọc Diễm");
   const certRef = useRef(null);
+  const [certExporting, setCertExporting] = useState(false);
 
   const flash = (msg, type="success") => { setToast({msg,type}); setTimeout(()=>setToast(null),3000); };
   const moLabel = (m) => { const [y,mo]=m.split("-"); return `T${parseInt(mo)}/${y}`; };
@@ -117,16 +118,14 @@ export default function Home() {
   // Load students list
   useEffect(() => { api.getStudents().then(d => setStudents(d.students||[])).catch(()=>{}); }, []);
 
-  // Auto-fill on phone/code blur
-  const autoFill = async () => {
+  // Auto-fill: dùng client-side students array (nhanh, không gọi API)
+  const autoFill = () => {
     if (code) {
-      const d = await api.getStudents(code);
-      const f = d.students?.[0];
-      if (f && f.code.toUpperCase() === code.toUpperCase()) { setName(f.name); setPhone(f.phone); setCode(f.code); flash(`Tìm thấy: ${f.name}`); return; }
+      const f = students.find(s => s.code.toUpperCase() === code.toUpperCase());
+      if (f) { setName(f.name); setPhone(f.phone||''); flash(`Tìm thấy: ${f.name}`); return; }
     }
-    if (phone && phone.length >= 6) {
-      const d = await api.getStudents(phone);
-      const f = d.students?.[0];
+    if (phone && phone.length >= 3) {
+      const f = students.find(s => s.phone && s.phone.includes(phone));
       if (f) { setName(f.name); setCode(f.code); flash(`Tìm thấy: ${f.name}`); return; }
     }
   };
@@ -268,7 +267,15 @@ export default function Home() {
         </div>
         <div style={{ display: "flex", justifyContent: "center", gap: 5, flexWrap: "wrap" }}>
           {[{k:"input",l:"📝 Nhập"},{k:"report",l:"📊 Báo cáo"},{k:"capture",l:"📸 Chụp ảnh"},{k:"cert",l:"🏆 Bằng khen"},{k:"history",l:"📈 Lịch sử"}].map(t =>
-            <button key={t.k} onClick={()=>setView(t.k)} className={`tag ${view===t.k?"tag-active":"tag-inactive"}`}>{t.l}</button>
+            <button key={t.k} onClick={()=>{
+              setView(t.k);
+              // Preload html2canvas khi vào tab bằng khen
+              if (t.k === 'cert' && typeof window !== 'undefined' && typeof window.html2canvas === 'undefined') {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                document.head.appendChild(s);
+              }
+            }} className={`tag ${view===t.k?"tag-active":"tag-inactive"}`}>{t.l}</button>
           )}
         </div>
       </div>
@@ -631,26 +638,33 @@ export default function Home() {
               </div>
             </div>
 
-            <button className="btn-primary" onClick={async () => {
+            <button className="btn-primary" disabled={certExporting} onClick={async () => {
+              if (certExporting) return;
+              setCertExporting(true);
+              flash("⏳ Đang tạo ảnh bằng khen...");
               try {
                 if (typeof window.html2canvas === 'undefined') {
                   const s = document.createElement('script');
                   s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
                   document.head.appendChild(s);
-                  await new Promise(r => { s.onload = r; s.onerror = () => r(); });
+                  await new Promise((res, rej) => { s.onload = res; s.onerror = rej; });
                 }
                 const el = certRef.current;
-                if (!el) return;
-                flash("⏳ Đang tạo ảnh...");
-                const canvas = await window.html2canvas(el, { scale: 3, useCORS: true, backgroundColor: "#ffffff", logging: false });
+                if (!el) { flash("Không tìm thấy bằng khen", "error"); return; }
+                await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+                const canvas = await window.html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff", logging: false, allowTaint: true });
                 const link = document.createElement('a');
                 link.download = `BangKhen-${certName.replace(/\s+/g, '-')}-${certTotal}.jpg`;
-                link.href = canvas.toDataURL('image/jpeg', 0.95);
+                link.href = canvas.toDataURL('image/jpeg', 0.92);
                 link.click();
                 flash("✅ Đã tải bằng khen!");
-              } catch (err) { flash("Lỗi: " + err.message, "error"); }
-            }} style={{ width: "100%", fontSize: 15, padding: "14px 0" }}>
-              📥 TẢI XUỐNG BẰNG KHEN (JPG)
+              } catch (err) {
+                flash("❌ Lỗi: " + err.message, "error");
+              } finally {
+                setCertExporting(false);
+              }
+            }} style={{ width: "100%", fontSize: 15, padding: "14px 0", opacity: certExporting ? 0.65 : 1 }}>
+              {certExporting ? "⏳ Đang tạo... vui lòng đợi" : "📥 TẢI XUỐNG BẰNG KHEN (JPG)"}
             </button>
           </div>
 
